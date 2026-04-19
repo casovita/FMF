@@ -1,5 +1,6 @@
 name: mobile_app
 publish_to: none
+version: 1.0.0+1
 resolution: workspace
 
 environment:

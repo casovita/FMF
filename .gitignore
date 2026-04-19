@@ -8,6 +8,10 @@
 build/
 pubspec.lock
 
+# Generated l10n
+**/l10n/app_localizations.dart
+**/l10n/app_localizations_*.dart
+
 # Secrets
 .env
 .env.*
