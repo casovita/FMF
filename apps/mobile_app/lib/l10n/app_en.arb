@@ -1,0 +1,37 @@
+{
+  "@@locale": "en",
+  "appTitle": "Fitness Monster Factory",
+  "@appTitle": {
+    "description": "The application title"
+  },
+  "homeWelcomeTitle": "Your Skills Academy",
+  "@homeWelcomeTitle": {
+    "description": "Home screen main headline"
+  },
+  "homeWelcomeSubtitle": "Choose a skill to begin your progression.",
+  "@homeWelcomeSubtitle": {
+    "description": "Home screen subtitle"
+  },
+  "skillHandstandTitle": "Handstand",
+  "@skillHandstandTitle": {},
+  "skillHandstandDescription": "Build balance, body tension, and overhead strength.",
+  "@skillHandstandDescription": {},
+  "skillPullupsTitle": "Pull-ups",
+  "@skillPullupsTitle": {},
+  "skillPullupsDescription": "Develop pulling strength from dead hang to weighted.",
+  "@skillPullupsDescription": {},
+  "skillHandstandPushupsTitle": "Handstand Push-ups",
+  "@skillHandstandPushupsTitle": {},
+  "skillHandstandPushupsDescription": "Progress from pike press to freestanding HSPU.",
+  "@skillHandstandPushupsDescription": {},
+  "progressTitle": "Your Progress",
+  "@progressTitle": {},
+  "practiceSessionTitle": "Practice Session",
+  "@practiceSessionTitle": {},
+  "loadingLabel": "Loading...",
+  "@loadingLabel": {},
+  "errorGeneric": "Something went wrong. Please try again.",
+  "@errorGeneric": {},
+  "emptyStateNoSessions": "No practice sessions yet. Start training!",
+  "@emptyStateNoSessions": {}
+}

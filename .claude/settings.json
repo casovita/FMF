@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(fvm flutter analyze:*)",
+      "Bash(fvm flutter test:*)",
+      "Bash(fvm flutter pub get:*)",
+      "Bash(fvm flutter run:*)",
+      "Bash(fvm flutter build:*)",
+      "Bash(dart run build_runner:*)",
+      "Bash(melos *)",
+      "Bash(make *)",
+      "Bash(dart format:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(ls:*)",
+      "Bash(find . -name:*)"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(rm -rf:*)",
+      "Bash(git reset --hard:*)"
+    ]
+  }
+}

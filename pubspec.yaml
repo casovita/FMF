@@ -1,0 +1,15 @@
+name: fitness_monster_factory
+publish_to: none
+
+environment:
+  sdk: ^3.5.0
+
+workspace:
+  - apps/mobile_app
+  - packages/core
+  - packages/design_system
+  - packages/domain
+  - packages/data
+
+dev_dependencies:
+  melos: ^7.5.1

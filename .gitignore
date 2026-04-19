@@ -1,0 +1,46 @@
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+*.g.dart
+*.freezed.dart
+build/
+pubspec.lock
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# FVM - keep .fvmrc in git, ignore the sdk symlink
+.fvm/flutter_sdk
+
+# IDE
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# iOS
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/Generated.xcconfig
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# Android
+**/android/.gradle/
+**/android/local.properties
+**/android/key.properties
+
+# Coverage
+coverage/
+lcov.info
