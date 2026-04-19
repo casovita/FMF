@@ -4,7 +4,7 @@ part 'progress_snapshot.freezed.dart';
 part 'progress_snapshot.g.dart';
 
 @freezed
-class ProgressSnapshot with _$ProgressSnapshot {
+abstract class ProgressSnapshot with _$ProgressSnapshot {
   const factory ProgressSnapshot({
     required String id,
     required String skillId,

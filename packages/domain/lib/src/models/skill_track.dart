@@ -4,7 +4,7 @@ part 'skill_track.freezed.dart';
 part 'skill_track.g.dart';
 
 @freezed
-class SkillTrack with _$SkillTrack {
+abstract class SkillTrack with _$SkillTrack {
   const factory SkillTrack({
     required String id,
     required String skillId,

@@ -1,5 +1,5 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:mobile_app/app/router.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'home_provider.g.dart';
 

@@ -6,7 +6,7 @@ part 'skill.g.dart';
 enum SkillCategory { balance, strength, bodyweight }
 
 @freezed
-class Skill with _$Skill {
+abstract class Skill with _$Skill {
   const factory Skill({
     required String id,
     required String name,

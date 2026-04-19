@@ -14,7 +14,7 @@ class PracticeSessionController extends _$PracticeSessionController {
   }) async {
     state = const AsyncValue.loading();
     // TODO: Inject PracticeSessionRepository and call repo.logSession(...)
-    await Future.delayed(const Duration(milliseconds: 200));
+    await Future<void>.delayed(const Duration(milliseconds: 200));
     state = const AsyncValue.data(null);
   }
 }

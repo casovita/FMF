@@ -17,13 +17,13 @@ void main() {
     ];
 
     final router = GoRouter(
-      routes: [GoRoute(path: '/', builder: (_, __) => const HomeScreen())],
+      routes: [GoRoute(path: '/', builder: (context, state) => const HomeScreen())],
     );
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          academyModulesProvider.overrideWith((ref) async => fakeModules),
+          academyModulesProvider.overrideWith((_) async => fakeModules),
         ],
         child: MaterialApp.router(routerConfig: router),
       ),
@@ -39,14 +39,17 @@ void main() {
 
   testWidgets('HomeScreen shows loading indicator while data is loading', (tester) async {
     final router = GoRouter(
-      routes: [GoRoute(path: '/', builder: (_, __) => const HomeScreen())],
+      routes: [GoRoute(path: '/', builder: (context, state) => const HomeScreen())],
     );
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           academyModulesProvider.overrideWith(
-            (ref) => Future.delayed(const Duration(seconds: 10), () => <AcademyModuleEntry>[]),
+            (_) => Future<List<AcademyModuleEntry>>.delayed(
+              const Duration(seconds: 10),
+              () => <AcademyModuleEntry>[],
+            ),
           ),
         ],
         child: MaterialApp.router(routerConfig: router),

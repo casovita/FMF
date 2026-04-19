@@ -4,7 +4,7 @@ part 'practice_session.freezed.dart';
 part 'practice_session.g.dart';
 
 @freezed
-class PracticeSession with _$PracticeSession {
+abstract class PracticeSession with _$PracticeSession {
   const factory PracticeSession({
     required String id,
     required String skillId,

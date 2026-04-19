@@ -1,5 +1,5 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:mobile_app/features/skill_handstand/application/skill_handstand_provider.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'skill_handstand_pushups_provider.g.dart';
 

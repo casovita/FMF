@@ -1,5 +1,3 @@
-library fmf_design_system;
-
 export 'src/theme/app_theme.dart';
 export 'src/tokens/fmf_colors.dart';
 export 'src/tokens/fmf_radius.dart';

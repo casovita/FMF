@@ -1,5 +1,3 @@
-library fmf_domain;
-
 export 'src/models/practice_session.dart';
 export 'src/models/progress_snapshot.dart';
 export 'src/models/skill.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:fmf_design_system/design_system.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile_app/features/home/application/home_provider.dart';
 import 'package:mobile_app/l10n/app_localizations.dart';
 
@@ -43,7 +43,7 @@ class HomeScreen extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: FmfSpacing.md),
                 sliver: SliverList.separated(
                   itemCount: modules.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: FmfSpacing.sm),
+                  separatorBuilder: (_, _) => const SizedBox(height: FmfSpacing.sm),
                   itemBuilder: (context, index) {
                     final module = modules[index];
                     return _SkillModuleCard(

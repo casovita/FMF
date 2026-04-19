@@ -1,6 +1,6 @@
 import 'package:fmf_domain/domain.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:mobile_app/shared/providers/database_provider.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'progress_provider.g.dart';
 

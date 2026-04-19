@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:fmf_design_system/design_system.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile_app/app/router.dart';
 
 class OnboardingScreen extends StatelessWidget {
