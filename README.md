@@ -1,6 +1,6 @@
 # Fitness Monster Factory (FMF)
 
-A skills academy iOS app for fitness skill progression.
+Skills academy iOS app for structured fitness skill progression.
 
 **Skills:** Handstand · Pull-ups · Handstand Push-ups
 
@@ -8,63 +8,69 @@ A skills academy iOS app for fitness skill progression.
 
 ## Stack
 
-| Layer       | Tech                           |
-|-------------|--------------------------------|
-| State       | Riverpod 3.x (`@riverpod`)     |
-| Routing     | go_router 17.x                 |
-| Persistence | Drift 2.x (local SQLite)       |
-| Models      | freezed + json_serializable    |
-| Monorepo    | melos 7.x + Dart pub workspace |
-| Design      | Material 3 + FMF token layer   |
-| CI          | GitHub Actions                 |
+| Layer       | Tech                                  |
+|-------------|---------------------------------------|
+| UI          | SwiftUI (iOS 17+)                     |
+| State       | `@Observable` + `@MainActor`          |
+| Navigation  | `NavigationStack` + `TabView`         |
+| Persistence | GRDB.swift ~> 6.0 (local SQLite)      |
+| Pose detect | Apple Vision `VNDetectHumanBodyPoseRequest` |
+| Camera      | AVFoundation                          |
+| Project     | XcodeGen (`project.yml`)              |
+
+**One external dependency:** GRDB.swift. Everything else is Apple SDK.
 
 ---
 
 ## Quick Start
 
-**Prerequisites:** macOS + Apple Silicon, Xcode, FVM
+**Prerequisites:** macOS, Xcode 16+, [XcodeGen](https://github.com/yonaskolb/XcodeGen)
 
 ```bash
-# One-time setup
-make setup
-
-# Run on iOS simulator (dev flavor)
-make run-dev
+cd apps/ios_app
+xcodegen generate
+open FMF.xcodeproj
 ```
 
----
-
-## Workspace Packages
-
-| Package                    | Description                          |
-|----------------------------|--------------------------------------|
-| `apps/mobile_app`          | Flutter iOS app                      |
-| `packages/fmf_core`        | Shared utilities (Result type, etc.) |
-| `packages/fmf_design_system` | Material 3 + FMF tokens            |
-| `packages/fmf_domain`      | Domain models, repository interfaces |
-| `packages/fmf_data`        | Drift DB, local repo implementations |
+Run scheme `FMF-Dev` on any iPhone 17 simulator.
 
 ---
 
-## Development Workflow
+## Project Structure
 
-```bash
-make get            # Get all dependencies
-make codegen        # Generate .g.dart + .freezed.dart
-make analyze        # Run lint checks
-make test           # Run all tests
-make format         # Format code
+```
+apps/ios_app/
+  project.yml              ← XcodeGen spec
+  Sources/
+    App/                   ← @main, environment keys, flavors
+    DesignSystem/          ← tokens (color, spacing, radius, typography)
+    Domain/                ← models + repository protocols
+    Data/                  ← GRDB tables + local repo implementations
+    Features/              ← one folder per screen
+  Tests/Unit/              ← Swift Testing suite (13 tests)
+  Resources/               ← Assets, Localizable.strings, Info.plist
 ```
 
 ---
 
 ## Flavors
 
-| Flavor   | Command             | App Title               |
-|----------|---------------------|-------------------------|
-| dev      | `make run-dev`      | FMF [DEV]               |
-| staging  | `make run-staging`  | FMF [STAGING]           |
-| prod     | `make run-prod`     | Fitness Monster Factory |
+| Scheme    | Config          | App Title               |
+|-----------|-----------------|-------------------------|
+| FMF-Dev   | dev.xcconfig    | FMF [DEV]               |
+| FMF-Prod  | prod.xcconfig   | Fitness Monster Factory |
+
+---
+
+## Running Tests
+
+```bash
+cd apps/ios_app
+xcodebuild test \
+  -project FMF.xcodeproj \
+  -scheme FMF-Dev \
+  -destination "platform=iOS Simulator,name=iPhone 17"
+```
 
 ---
 
@@ -73,31 +79,7 @@ make format         # Format code
 Uses [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
-feat(home): add skill module cards to dashboard
-fix(drift): correct schema migration
-chore(deps): bump go_router to 17.2.1
+feat(home): add skill module cards
+fix(workout): correct Vision y-axis handstand check
+chore(deps): bump GRDB to 6.1.0
 ```
-
----
-
-## Architecture
-
-```
-presentation/   widgets, screens (read providers only)
-application/    Riverpod providers, controllers
-domain/         models (freezed), repository interfaces
-data/           Drift tables, DAOs, repo implementations
-```
-
-Dependency flow: `mobile_app` → `fmf_data` → `fmf_domain` → `fmf_core`
-
----
-
-## TODOs Before Production
-
-- [ ] Configure Xcode schemes for dev/staging/prod flavors (native)
-- [ ] Set bundle IDs: `com.fmf.app`, `com.fmf.app.dev`, `com.fmf.app.staging`
-- [ ] Add app icons per flavor
-- [ ] Configure backend when leaving POC stage
-- [ ] Implement auth state and route guards
-- [ ] Add integration test CI job with iOS simulator

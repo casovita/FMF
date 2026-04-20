@@ -1,0 +1,828 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		12027FDB45133037335E557B /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = E22437FC6EDE3D1C4574395F /* AppEnvironment.swift */; };
+		129ECBE80AA1586F0162177D /* WorkoutViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE26330BD9F3BE89AA95D60E /* WorkoutViewModel.swift */; };
+		14457D352F6B68D1E498BFF7 /* SkillCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C338DB68E4E77E6F141AEE85 /* SkillCardView.swift */; };
+		19236D52F2F19720C3F84CC4 /* FMFSpacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D479E7DF17B430B48D4F6C8 /* FMFSpacing.swift */; };
+		1D4FFF901BF01230A6DA7F90 /* PoseDetectionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412E9E79D68702070642DF4E /* PoseDetectionService.swift */; };
+		201C1EA63BA6678BC1C84B25 /* SkillsBrowseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67C8D0B0FDCDDDD18597911 /* SkillsBrowseView.swift */; };
+		25A97D81DAD89B564D386032 /* AppShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1683DB359D084857FA7582 /* AppShellView.swift */; };
+		2AD1BC620A3D02360456979E /* PracticeSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE84DBECB14E4265A7ED7760 /* PracticeSessionView.swift */; };
+		2E2217FAD456B95A67053FC1 /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA2736222F9657AD02891606 /* CameraPreviewView.swift */; };
+		3049E6E4C1DFFDF0F1C3AD31 /* PracticeSessionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322CBB9820CCB457F527E955 /* PracticeSessionRecord.swift */; };
+		3D88517030AD0554A331D91B /* WorkoutViewModel+Testing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4242BD5286271817FCE69BF1 /* WorkoutViewModel+Testing.swift */; };
+		4186C09D90425322B9D7A435 /* WorkoutState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7DFE167EFF481B8FE62B3D /* WorkoutState.swift */; };
+		4621B18B6B3847F36C452090 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 192F19D05C94BE2FF73D5822 /* OnboardingView.swift */; };
+		48985AD5B0CC5B6AA895F7DA /* WorkoutStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259887773F472C23027A4765 /* WorkoutStateMachineTests.swift */; };
+		4AFF76541BDE01CDCB320C7A /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 7CE7E57415DCBD2000F79BE8 /* GRDB */; };
+		4BCFB496C62544A553F4CDF7 /* SkillRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C802CE7FB0851502451FFF1 /* SkillRepository.swift */; };
+		4F13BEE0888B8DA3056397BA /* PracticeSessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4F150761016123EF40F38D /* PracticeSessionViewModel.swift */; };
+		5BF5AD484EDB6B482A60D9FA /* LocalSkillRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 726E19380CF8536D71E2BAF6 /* LocalSkillRepository.swift */; };
+		615CB2AB5D53CFAC92DDC265 /* LocalPracticeSessionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D4F06299548796F08FE6F78 /* LocalPracticeSessionRepository.swift */; };
+		61E327460DB3C2CC11337429 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8326D2F9EEA8C18288AD2BEE /* ProfileView.swift */; };
+		62E24A8A8571D439996A618E /* PracticeSessionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAE495F3B198553BCE5628FD /* PracticeSessionRepository.swift */; };
+		693F768EC0AEFE25952B5FBF /* FMFApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7AB1CB6DE4C0EBE2D6CE41 /* FMFApp.swift */; };
+		6C1B0A17464C049CA6913310 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 98D359983A970566E82B8194 /* GRDB */; };
+		7644548877FAF90339B08DB7 /* SkillDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52920CDDA58DC92B6EAA8BF5 /* SkillDetailView.swift */; };
+		7FD3702C92830E3785C51195 /* SkillProgressRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3946B1F28636B645B5F3787E /* SkillProgressRecord.swift */; };
+		830D7B8E394A266E7C9F34F4 /* WorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA1482207759A72D09218A0B /* WorkoutView.swift */; };
+		8CF29DE9F305480C0EEA4531 /* Skill.swift in Sources */ = {isa = PBXBuildFile; fileRef = C62105AD4FD41FF0CFCADAB3 /* Skill.swift */; };
+		9821C28DFE0750E890D22D68 /* SkillDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333E6822944E076CD183D9E5 /* SkillDetailViewModel.swift */; };
+		9C2E0C6BCCF0441D0507BCBA /* AppDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91E009B4D27C52EDCE624C79 /* AppDatabase.swift */; };
+		AC1FA3D5DFC5727D0F36E7B3 /* ProgressViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59A16B5DF22D509D45883C0D /* ProgressViewModel.swift */; };
+		B18206894DEC1DAB19716F3C /* ProgressSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39ED845F5FAFB90F93434EE4 /* ProgressSnapshot.swift */; };
+		B34EC5D70033A55284088205 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81E30454BEAFA86E1BFA1C75 /* ProgressView.swift */; };
+		BA9095443E2FC716933171FC /* FloatingDockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 450CF03E3689D13BAD8464F6 /* FloatingDockView.swift */; };
+		BCD445D87BA3F8DEA776F2B4 /* FMFTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 117FB183FBAFC4AF6C18ADBD /* FMFTypography.swift */; };
+		C14967E1C13193029493797B /* PracticeSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51B991173498B824CA8D658 /* PracticeSession.swift */; };
+		C5E0CBCBA5DA825786869F1F /* FMFColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 531A6B290F5AFD9B4C1A34B1 /* FMFColors.swift */; };
+		C87BEB4EE19BB15996F426E7 /* PracticeSessionRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC33F234E74EBF577A77F34E /* PracticeSessionRepositoryTests.swift */; };
+		CEFC78946CE3F8E1782F30C9 /* SkillTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D9087A313EC2FF9D86B7C7C /* SkillTrack.swift */; };
+		DACA972E39A228E39E91256F /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4883ECB20FF69977C16BA0F /* HomeViewModel.swift */; };
+		DF0A7405C091825A9BCD4458 /* SkillsBrowseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB82FBFF996D9700B76524BF /* SkillsBrowseViewModel.swift */; };
+		E2A21E0F8916654ADA923D86 /* EnvironmentKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55D0AC44ED3B02712CF73C2A /* EnvironmentKeys.swift */; };
+		E51DA61B525A7521E2DF87B9 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B759BA4C6D8D1B11D1231D3 /* HomeView.swift */; };
+		E5816D5CBDF82D88C3A0FF5D /* FMFRadius.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EAE9283EE614C053E71CA39 /* FMFRadius.swift */; };
+		E6D8779D768F168490EC3C91 /* AtmosphericBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879F7C9538ED3941D6182DA8 /* AtmosphericBackground.swift */; };
+		EDDB915C28AD0FD6CBE44215 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C69C5929A62AB5695F96F019 /* ContentView.swift */; };
+		F269FE1714E688D21E96DAB4 /* SkillRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836EEB602C98C559C517A491 /* SkillRepositoryTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		4A29B8B94996AE51C7E2D806 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA0F2FAB76CE85B47EF72DEF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0C41B643F566A22FFBBC9292;
+			remoteInfo = FMF;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		117FB183FBAFC4AF6C18ADBD /* FMFTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FMFTypography.swift; sourceTree = "<group>"; };
+		192F19D05C94BE2FF73D5822 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		1B759BA4C6D8D1B11D1231D3 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		259887773F472C23027A4765 /* WorkoutStateMachineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutStateMachineTests.swift; sourceTree = "<group>"; };
+		322CBB9820CCB457F527E955 /* PracticeSessionRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeSessionRecord.swift; sourceTree = "<group>"; };
+		333E6822944E076CD183D9E5 /* SkillDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillDetailViewModel.swift; sourceTree = "<group>"; };
+		3946B1F28636B645B5F3787E /* SkillProgressRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillProgressRecord.swift; sourceTree = "<group>"; };
+		39ED845F5FAFB90F93434EE4 /* ProgressSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressSnapshot.swift; sourceTree = "<group>"; };
+		3A1683DB359D084857FA7582 /* AppShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppShellView.swift; sourceTree = "<group>"; };
+		3D4F06299548796F08FE6F78 /* LocalPracticeSessionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPracticeSessionRepository.swift; sourceTree = "<group>"; };
+		3DCC8A833C618DB7073CBF58 /* prod.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = prod.xcconfig; sourceTree = "<group>"; };
+		3EAE9283EE614C053E71CA39 /* FMFRadius.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FMFRadius.swift; sourceTree = "<group>"; };
+		412E9E79D68702070642DF4E /* PoseDetectionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseDetectionService.swift; sourceTree = "<group>"; };
+		4242BD5286271817FCE69BF1 /* WorkoutViewModel+Testing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WorkoutViewModel+Testing.swift"; sourceTree = "<group>"; };
+		450CF03E3689D13BAD8464F6 /* FloatingDockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingDockView.swift; sourceTree = "<group>"; };
+		52920CDDA58DC92B6EAA8BF5 /* SkillDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillDetailView.swift; sourceTree = "<group>"; };
+		531A6B290F5AFD9B4C1A34B1 /* FMFColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FMFColors.swift; sourceTree = "<group>"; };
+		55D0AC44ED3B02712CF73C2A /* EnvironmentKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentKeys.swift; sourceTree = "<group>"; };
+		59A16B5DF22D509D45883C0D /* ProgressViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressViewModel.swift; sourceTree = "<group>"; };
+		5D479E7DF17B430B48D4F6C8 /* FMFSpacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FMFSpacing.swift; sourceTree = "<group>"; };
+		6D9087A313EC2FF9D86B7C7C /* SkillTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTrack.swift; sourceTree = "<group>"; };
+		726E19380CF8536D71E2BAF6 /* LocalSkillRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalSkillRepository.swift; sourceTree = "<group>"; };
+		81E30454BEAFA86E1BFA1C75 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
+		8326D2F9EEA8C18288AD2BEE /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		836EEB602C98C559C517A491 /* SkillRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillRepositoryTests.swift; sourceTree = "<group>"; };
+		879F7C9538ED3941D6182DA8 /* AtmosphericBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphericBackground.swift; sourceTree = "<group>"; };
+		8B7DFE167EFF481B8FE62B3D /* WorkoutState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutState.swift; sourceTree = "<group>"; };
+		91E009B4D27C52EDCE624C79 /* AppDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDatabase.swift; sourceTree = "<group>"; };
+		958C547548EB697A474AC92F /* FMF.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = FMF.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9C802CE7FB0851502451FFF1 /* SkillRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillRepository.swift; sourceTree = "<group>"; };
+		A4883ECB20FF69977C16BA0F /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
+		A51B991173498B824CA8D658 /* PracticeSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeSession.swift; sourceTree = "<group>"; };
+		AA7AB1CB6DE4C0EBE2D6CE41 /* FMFApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FMFApp.swift; sourceTree = "<group>"; };
+		B67C8D0B0FDCDDDD18597911 /* SkillsBrowseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsBrowseView.swift; sourceTree = "<group>"; };
+		B7BA2560C0FEF6BA2388724E /* FMFTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = FMFTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BAE495F3B198553BCE5628FD /* PracticeSessionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeSessionRepository.swift; sourceTree = "<group>"; };
+		BE26330BD9F3BE89AA95D60E /* WorkoutViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutViewModel.swift; sourceTree = "<group>"; };
+		BE84DBECB14E4265A7ED7760 /* PracticeSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeSessionView.swift; sourceTree = "<group>"; };
+		C338DB68E4E77E6F141AEE85 /* SkillCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillCardView.swift; sourceTree = "<group>"; };
+		C62105AD4FD41FF0CFCADAB3 /* Skill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Skill.swift; sourceTree = "<group>"; };
+		C69C5929A62AB5695F96F019 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		DD4F150761016123EF40F38D /* PracticeSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeSessionViewModel.swift; sourceTree = "<group>"; };
+		E22437FC6EDE3D1C4574395F /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
+		EA1482207759A72D09218A0B /* WorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutView.swift; sourceTree = "<group>"; };
+		EA2736222F9657AD02891606 /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
+		EC33F234E74EBF577A77F34E /* PracticeSessionRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeSessionRepositoryTests.swift; sourceTree = "<group>"; };
+		FB82FBFF996D9700B76524BF /* SkillsBrowseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsBrowseViewModel.swift; sourceTree = "<group>"; };
+		FBF2D460301C6D3D54BFB5E6 /* dev.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = dev.xcconfig; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		98FCD84C355F118A3F0700FA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6C1B0A17464C049CA6913310 /* GRDB in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E28B3160D61336C785522EE2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4AFF76541BDE01CDCB320C7A /* GRDB in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		027A19DA1C73BF8631FBA05F /* Repositories */ = {
+			isa = PBXGroup;
+			children = (
+				3D4F06299548796F08FE6F78 /* LocalPracticeSessionRepository.swift */,
+				726E19380CF8536D71E2BAF6 /* LocalSkillRepository.swift */,
+			);
+			path = Repositories;
+			sourceTree = "<group>";
+		};
+		058E358CF244616EFBED1B7C /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A51B991173498B824CA8D658 /* PracticeSession.swift */,
+				39ED845F5FAFB90F93434EE4 /* ProgressSnapshot.swift */,
+				C62105AD4FD41FF0CFCADAB3 /* Skill.swift */,
+				6D9087A313EC2FF9D86B7C7C /* SkillTrack.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		0DF200956CD2FCF03FA42CCC /* Tables */ = {
+			isa = PBXGroup;
+			children = (
+				322CBB9820CCB457F527E955 /* PracticeSessionRecord.swift */,
+				3946B1F28636B645B5F3787E /* SkillProgressRecord.swift */,
+			);
+			path = Tables;
+			sourceTree = "<group>";
+		};
+		29C5797E066FD771BF2BA64C /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				668B854E758C0976FA5FB06F /* Unit */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		39037F9B81DEB1BBB7FF6152 /* AppShell */ = {
+			isa = PBXGroup;
+			children = (
+				3A1683DB359D084857FA7582 /* AppShellView.swift */,
+				450CF03E3689D13BAD8464F6 /* FloatingDockView.swift */,
+			);
+			path = AppShell;
+			sourceTree = "<group>";
+		};
+		3BA0DA9614F1954E2C1F65E9 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				8326D2F9EEA8C18288AD2BEE /* ProfileView.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		434CCA7D0C8CD07A23D4CD4C /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				6647D0EF425B80B8AB0978E0 /* Components */,
+				7A1172672368AA77001FFE54 /* Tokens */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		49BA568A42118508E615EF3B /* Database */ = {
+			isa = PBXGroup;
+			children = (
+				0DF200956CD2FCF03FA42CCC /* Tables */,
+				91E009B4D27C52EDCE624C79 /* AppDatabase.swift */,
+			);
+			path = Database;
+			sourceTree = "<group>";
+		};
+		54F3F56434181E6F7B77680A /* App */ = {
+			isa = PBXGroup;
+			children = (
+				E22437FC6EDE3D1C4574395F /* AppEnvironment.swift */,
+				C69C5929A62AB5695F96F019 /* ContentView.swift */,
+				55D0AC44ED3B02712CF73C2A /* EnvironmentKeys.swift */,
+				AA7AB1CB6DE4C0EBE2D6CE41 /* FMFApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		5D4C06EC122629EECC6C0A00 /* PracticeSession */ = {
+			isa = PBXGroup;
+			children = (
+				BE84DBECB14E4265A7ED7760 /* PracticeSessionView.swift */,
+				DD4F150761016123EF40F38D /* PracticeSessionViewModel.swift */,
+			);
+			path = PracticeSession;
+			sourceTree = "<group>";
+		};
+		5FD32F3636388BD20D19BE88 /* Repositories */ = {
+			isa = PBXGroup;
+			children = (
+				BAE495F3B198553BCE5628FD /* PracticeSessionRepository.swift */,
+				9C802CE7FB0851502451FFF1 /* SkillRepository.swift */,
+			);
+			path = Repositories;
+			sourceTree = "<group>";
+		};
+		604A1BB7809A966FF4541F89 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				39037F9B81DEB1BBB7FF6152 /* AppShell */,
+				D3477F6E86167D626B0C6DFA /* Home */,
+				BB673B9E0847A108415D634D /* Onboarding */,
+				5D4C06EC122629EECC6C0A00 /* PracticeSession */,
+				3BA0DA9614F1954E2C1F65E9 /* Profile */,
+				DDC2245EE602369458FA3754 /* Progress */,
+				63D00899EB88D77E9B90747B /* SkillDetail */,
+				875FDF394CEC4AAE0AAF3F4B /* Skills */,
+				DC76A4B66A2F8E08A355B140 /* Workout */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		63D00899EB88D77E9B90747B /* SkillDetail */ = {
+			isa = PBXGroup;
+			children = (
+				52920CDDA58DC92B6EAA8BF5 /* SkillDetailView.swift */,
+				333E6822944E076CD183D9E5 /* SkillDetailViewModel.swift */,
+			);
+			path = SkillDetail;
+			sourceTree = "<group>";
+		};
+		6647D0EF425B80B8AB0978E0 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				879F7C9538ED3941D6182DA8 /* AtmosphericBackground.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		668B854E758C0976FA5FB06F /* Unit */ = {
+			isa = PBXGroup;
+			children = (
+				EC33F234E74EBF577A77F34E /* PracticeSessionRepositoryTests.swift */,
+				836EEB602C98C559C517A491 /* SkillRepositoryTests.swift */,
+				259887773F472C23027A4765 /* WorkoutStateMachineTests.swift */,
+			);
+			path = Unit;
+			sourceTree = "<group>";
+		};
+		7A1172672368AA77001FFE54 /* Tokens */ = {
+			isa = PBXGroup;
+			children = (
+				531A6B290F5AFD9B4C1A34B1 /* FMFColors.swift */,
+				3EAE9283EE614C053E71CA39 /* FMFRadius.swift */,
+				5D479E7DF17B430B48D4F6C8 /* FMFSpacing.swift */,
+				117FB183FBAFC4AF6C18ADBD /* FMFTypography.swift */,
+			);
+			path = Tokens;
+			sourceTree = "<group>";
+		};
+		7FAA01F17A64409BABDC07F8 = {
+			isa = PBXGroup;
+			children = (
+				9E856D6EB7242F048B0E7E78 /* Configurations */,
+				ED547DBAB564978E33E117BE /* Sources */,
+				29C5797E066FD771BF2BA64C /* Tests */,
+				B2D159C7CB0F6A52E14396AD /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		875FDF394CEC4AAE0AAF3F4B /* Skills */ = {
+			isa = PBXGroup;
+			children = (
+				9AFFA6F9E3E2A979A2DBB842 /* Browse */,
+				E4DD3ADDA9D509E5B1C0A20B /* Card */,
+			);
+			path = Skills;
+			sourceTree = "<group>";
+		};
+		994FF8F27D8DC08EF3259AC7 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				058E358CF244616EFBED1B7C /* Models */,
+				5FD32F3636388BD20D19BE88 /* Repositories */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		9AFFA6F9E3E2A979A2DBB842 /* Browse */ = {
+			isa = PBXGroup;
+			children = (
+				B67C8D0B0FDCDDDD18597911 /* SkillsBrowseView.swift */,
+				FB82FBFF996D9700B76524BF /* SkillsBrowseViewModel.swift */,
+			);
+			path = Browse;
+			sourceTree = "<group>";
+		};
+		9E856D6EB7242F048B0E7E78 /* Configurations */ = {
+			isa = PBXGroup;
+			children = (
+				FBF2D460301C6D3D54BFB5E6 /* dev.xcconfig */,
+				3DCC8A833C618DB7073CBF58 /* prod.xcconfig */,
+			);
+			path = Configurations;
+			sourceTree = "<group>";
+		};
+		B2D159C7CB0F6A52E14396AD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				958C547548EB697A474AC92F /* FMF.app */,
+				B7BA2560C0FEF6BA2388724E /* FMFTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BB673B9E0847A108415D634D /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				192F19D05C94BE2FF73D5822 /* OnboardingView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		BEB9270D66C1373C7A113661 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				49BA568A42118508E615EF3B /* Database */,
+				027A19DA1C73BF8631FBA05F /* Repositories */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		D3477F6E86167D626B0C6DFA /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				1B759BA4C6D8D1B11D1231D3 /* HomeView.swift */,
+				A4883ECB20FF69977C16BA0F /* HomeViewModel.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		DC76A4B66A2F8E08A355B140 /* Workout */ = {
+			isa = PBXGroup;
+			children = (
+				EA2736222F9657AD02891606 /* CameraPreviewView.swift */,
+				412E9E79D68702070642DF4E /* PoseDetectionService.swift */,
+				8B7DFE167EFF481B8FE62B3D /* WorkoutState.swift */,
+				EA1482207759A72D09218A0B /* WorkoutView.swift */,
+				BE26330BD9F3BE89AA95D60E /* WorkoutViewModel.swift */,
+				4242BD5286271817FCE69BF1 /* WorkoutViewModel+Testing.swift */,
+			);
+			path = Workout;
+			sourceTree = "<group>";
+		};
+		DDC2245EE602369458FA3754 /* Progress */ = {
+			isa = PBXGroup;
+			children = (
+				81E30454BEAFA86E1BFA1C75 /* ProgressView.swift */,
+				59A16B5DF22D509D45883C0D /* ProgressViewModel.swift */,
+			);
+			path = Progress;
+			sourceTree = "<group>";
+		};
+		E4DD3ADDA9D509E5B1C0A20B /* Card */ = {
+			isa = PBXGroup;
+			children = (
+				C338DB68E4E77E6F141AEE85 /* SkillCardView.swift */,
+			);
+			path = Card;
+			sourceTree = "<group>";
+		};
+		ED547DBAB564978E33E117BE /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				54F3F56434181E6F7B77680A /* App */,
+				BEB9270D66C1373C7A113661 /* Data */,
+				434CCA7D0C8CD07A23D4CD4C /* DesignSystem */,
+				994FF8F27D8DC08EF3259AC7 /* Domain */,
+				604A1BB7809A966FF4541F89 /* Features */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		04ADCA7AD688EE6F8082EB27 /* FMFTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 278284E37BCA992E9E177980 /* Build configuration list for PBXNativeTarget "FMFTests" */;
+			buildPhases = (
+				78D07D39BD46B3CD874FD622 /* Sources */,
+				98FCD84C355F118A3F0700FA /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DEE9A19AF0F565A6B664BD3C /* PBXTargetDependency */,
+			);
+			name = FMFTests;
+			packageProductDependencies = (
+				98D359983A970566E82B8194 /* GRDB */,
+			);
+			productName = FMFTests;
+			productReference = B7BA2560C0FEF6BA2388724E /* FMFTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		0C41B643F566A22FFBBC9292 /* FMF */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 75AE327C481C8CCF67BCF5A0 /* Build configuration list for PBXNativeTarget "FMF" */;
+			buildPhases = (
+				5E28EC5E5EDBC0ADBFAADCD9 /* Sources */,
+				E28B3160D61336C785522EE2 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FMF;
+			packageProductDependencies = (
+				7CE7E57415DCBD2000F79BE8 /* GRDB */,
+			);
+			productName = FMF;
+			productReference = 958C547548EB697A474AC92F /* FMF.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FA0F2FAB76CE85B47EF72DEF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					0C41B643F566A22FFBBC9292 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = 7A05D10F218C24A23DB129F8 /* Build configuration list for PBXProject "FMF" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 7FAA01F17A64409BABDC07F8;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				530F197CBAB9A6A1364249D6 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = B2D159C7CB0F6A52E14396AD /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0C41B643F566A22FFBBC9292 /* FMF */,
+				04ADCA7AD688EE6F8082EB27 /* FMFTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5E28EC5E5EDBC0ADBFAADCD9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9C2E0C6BCCF0441D0507BCBA /* AppDatabase.swift in Sources */,
+				12027FDB45133037335E557B /* AppEnvironment.swift in Sources */,
+				25A97D81DAD89B564D386032 /* AppShellView.swift in Sources */,
+				E6D8779D768F168490EC3C91 /* AtmosphericBackground.swift in Sources */,
+				2E2217FAD456B95A67053FC1 /* CameraPreviewView.swift in Sources */,
+				EDDB915C28AD0FD6CBE44215 /* ContentView.swift in Sources */,
+				E2A21E0F8916654ADA923D86 /* EnvironmentKeys.swift in Sources */,
+				693F768EC0AEFE25952B5FBF /* FMFApp.swift in Sources */,
+				C5E0CBCBA5DA825786869F1F /* FMFColors.swift in Sources */,
+				E5816D5CBDF82D88C3A0FF5D /* FMFRadius.swift in Sources */,
+				19236D52F2F19720C3F84CC4 /* FMFSpacing.swift in Sources */,
+				BCD445D87BA3F8DEA776F2B4 /* FMFTypography.swift in Sources */,
+				BA9095443E2FC716933171FC /* FloatingDockView.swift in Sources */,
+				E51DA61B525A7521E2DF87B9 /* HomeView.swift in Sources */,
+				DACA972E39A228E39E91256F /* HomeViewModel.swift in Sources */,
+				615CB2AB5D53CFAC92DDC265 /* LocalPracticeSessionRepository.swift in Sources */,
+				5BF5AD484EDB6B482A60D9FA /* LocalSkillRepository.swift in Sources */,
+				4621B18B6B3847F36C452090 /* OnboardingView.swift in Sources */,
+				1D4FFF901BF01230A6DA7F90 /* PoseDetectionService.swift in Sources */,
+				C14967E1C13193029493797B /* PracticeSession.swift in Sources */,
+				3049E6E4C1DFFDF0F1C3AD31 /* PracticeSessionRecord.swift in Sources */,
+				62E24A8A8571D439996A618E /* PracticeSessionRepository.swift in Sources */,
+				2AD1BC620A3D02360456979E /* PracticeSessionView.swift in Sources */,
+				4F13BEE0888B8DA3056397BA /* PracticeSessionViewModel.swift in Sources */,
+				61E327460DB3C2CC11337429 /* ProfileView.swift in Sources */,
+				B18206894DEC1DAB19716F3C /* ProgressSnapshot.swift in Sources */,
+				B34EC5D70033A55284088205 /* ProgressView.swift in Sources */,
+				AC1FA3D5DFC5727D0F36E7B3 /* ProgressViewModel.swift in Sources */,
+				8CF29DE9F305480C0EEA4531 /* Skill.swift in Sources */,
+				14457D352F6B68D1E498BFF7 /* SkillCardView.swift in Sources */,
+				7644548877FAF90339B08DB7 /* SkillDetailView.swift in Sources */,
+				9821C28DFE0750E890D22D68 /* SkillDetailViewModel.swift in Sources */,
+				7FD3702C92830E3785C51195 /* SkillProgressRecord.swift in Sources */,
+				4BCFB496C62544A553F4CDF7 /* SkillRepository.swift in Sources */,
+				CEFC78946CE3F8E1782F30C9 /* SkillTrack.swift in Sources */,
+				201C1EA63BA6678BC1C84B25 /* SkillsBrowseView.swift in Sources */,
+				DF0A7405C091825A9BCD4458 /* SkillsBrowseViewModel.swift in Sources */,
+				4186C09D90425322B9D7A435 /* WorkoutState.swift in Sources */,
+				830D7B8E394A266E7C9F34F4 /* WorkoutView.swift in Sources */,
+				3D88517030AD0554A331D91B /* WorkoutViewModel+Testing.swift in Sources */,
+				129ECBE80AA1586F0162177D /* WorkoutViewModel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		78D07D39BD46B3CD874FD622 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C87BEB4EE19BB15996F426E7 /* PracticeSessionRepositoryTests.swift in Sources */,
+				F269FE1714E688D21E96DAB4 /* SkillRepositoryTests.swift in Sources */,
+				48985AD5B0CC5B6AA895F7DA /* WorkoutStateMachineTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DEE9A19AF0F565A6B664BD3C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0C41B643F566A22FFBBC9292 /* FMF */;
+			targetProxy = 4A29B8B94996AE51C7E2D806 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		41032A165D07F49A9D9E5452 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = FBF2D460301C6D3D54BFB5E6 /* dev.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fmf.app$(BUNDLE_ID_SUFFIX)";
+				PRODUCT_NAME = FMF;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				XCCONFIG_FILE = Configurations/dev.xcconfig;
+			};
+			name = Debug;
+		};
+		59AF42ADA37F2E1B942C8B33 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3DCC8A833C618DB7073CBF58 /* prod.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fmf.app$(BUNDLE_ID_SUFFIX)";
+				PRODUCT_NAME = FMF;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				XCCONFIG_FILE = Configurations/prod.xcconfig;
+			};
+			name = Release;
+		};
+		79B8A845FBD4FB7EB1D50FE9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		7E09B072E442134C1C809EB2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		92D88B8B76333ACED5D4AB34 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FMF.app/FMF";
+			};
+			name = Debug;
+		};
+		BA781A6F947F19F40C86D2F3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FMF.app/FMF";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		278284E37BCA992E9E177980 /* Build configuration list for PBXNativeTarget "FMFTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				92D88B8B76333ACED5D4AB34 /* Debug */,
+				BA781A6F947F19F40C86D2F3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		75AE327C481C8CCF67BCF5A0 /* Build configuration list for PBXNativeTarget "FMF" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				41032A165D07F49A9D9E5452 /* Debug */,
+				59AF42ADA37F2E1B942C8B33 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7A05D10F218C24A23DB129F8 /* Build configuration list for PBXProject "FMF" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7E09B072E442134C1C809EB2 /* Debug */,
+				79B8A845FBD4FB7EB1D50FE9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		530F197CBAB9A6A1364249D6 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7CE7E57415DCBD2000F79BE8 /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 530F197CBAB9A6A1364249D6 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			productName = GRDB;
+		};
+		98D359983A970566E82B8194 /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 530F197CBAB9A6A1364249D6 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			productName = GRDB;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = FA0F2FAB76CE85B47EF72DEF /* Project object */;
+}

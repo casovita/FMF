@@ -1,0 +1,10 @@
+// Test seams — only used by WorkoutStateMachineTests
+extension WorkoutViewModel {
+    func testForceState(_ newState: WorkoutState) {
+        state = newState
+    }
+
+    func testSetElapsed(_ seconds: Int) {
+        elapsed = seconds
+    }
+}

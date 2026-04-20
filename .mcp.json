@@ -1,19 +1,3 @@
 {
-  "mcpServers": {
-    "github": {
-      "_comment": "TODO: Fill in GitHub MCP config when available",
-      "_setup": "npx @modelcontextprotocol/server-github",
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "__FILL_IN__"
-      }
-    },
-    "design": {
-      "_comment": "TODO: Figma/design MCP placeholder — fill when design system is established",
-      "_disabled": true
-    },
-    "backend": {
-      "_comment": "TODO: Backend API MCP placeholder — fill when backend is added",
-      "_disabled": true
-    }
-  }
+  "mcpServers": {}
 }

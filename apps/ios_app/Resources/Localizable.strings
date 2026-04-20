@@ -1,0 +1,35 @@
+/* App */
+"appTitle" = "Fitness Monster Factory";
+
+/* Home */
+"homeWelcomeTitle" = "Your Skills Academy";
+"homeWelcomeSubtitle" = "Choose a skill to begin your progression.";
+
+/* Skills */
+"skillHandstandTitle" = "Handstand";
+"skillHandstandDescription" = "Build balance, body tension, and overhead strength.";
+"skillPullupsTitle" = "Pull-ups";
+"skillPullupsDescription" = "Develop pulling strength from dead hang to weighted.";
+"skillHandstandPushupsTitle" = "Handstand Push-ups";
+"skillHandstandPushupsDescription" = "Progress from pike press to freestanding HSPU.";
+
+/* Progress */
+"progressTitle" = "Your Progress";
+
+/* Practice Session */
+"practiceSessionTitle" = "Practice Session";
+"practiceSessionSkillLabel" = "Skill";
+"practiceSessionDurationLabel" = "Duration";
+"practiceSessionNotesLabel" = "Notes (optional)";
+"practiceSessionNotesPlaceholder" = "How did it go?";
+"practiceSessionSubmitButton" = "Log Session";
+"practiceSessionLogSessionTitle" = "Log a Session";
+
+/* Profile */
+"profileTitle" = "Profile";
+"profileLogSessionButton" = "Log a Session";
+
+/* General */
+"loadingLabel" = "Loading...";
+"errorGeneric" = "Something went wrong. Please try again.";
+"emptyStateNoSessions" = "No practice sessions yet. Start training!";
