@@ -7,4 +7,8 @@ extension WorkoutViewModel {
     func testSetElapsed(_ seconds: Int) {
         elapsed = seconds
     }
+
+    func testSetRepCount(_ count: Int) {
+        repCount = count
+    }
 }

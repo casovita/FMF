@@ -3,7 +3,14 @@
 
 /* Home */
 "homeWelcomeTitle" = "Your Skills Academy";
-"homeWelcomeSubtitle" = "Choose a skill to begin your progression.";
+"homeWelcomeSubtitle" = "Follow the next session in your curriculum and keep your streak moving.";
+"home_empty_title" = "Your academy is ready.";
+"home_empty_subtitle" = "Complete onboarding or activate a skill to see your next planned session.";
+"home_due_title" = "Next sessions";
+"home_catalog_title" = "Skill catalog";
+"home_stats_pr_label" = "Current PR";
+"home_stats_none" = "No PR yet";
+"home_open_skill_button" = "Open skill";
 
 /* Skills */
 "skillHandstandTitle" = "Handstand";
@@ -12,14 +19,32 @@
 "skillPullupsDescription" = "Develop pulling strength from dead hang to weighted.";
 "skillHandstandPushupsTitle" = "Handstand Push-ups";
 "skillHandstandPushupsDescription" = "Progress from pike press to freestanding HSPU.";
+"browseTitle" = "All Skills";
+"browse_enrolled" = "Active in your academy";
+"browse_not_enrolled" = "Not active yet";
+"urgency_overdue" = "Overdue";
+"urgency_today" = "Today";
+"urgency_upcoming" = "Upcoming";
 
 /* Progress */
 "progressTitle" = "Your Progress";
+"progress_next_session" = "Next session:";
+"progress_last_trained" = "Last trained:";
+"progress_minutes" = "Minutes";
+"progress_longest_streak" = "Longest";
+"progress_plan_status_format" = "%d/%d sessions completed";
 
 /* Practice Session */
 "practiceSessionTitle" = "Practice Session";
 "practiceSessionSkillLabel" = "Skill";
 "practiceSessionDurationLabel" = "Duration";
+"practiceSessionResultLabel" = "Result";
+"practiceSessionDurationResultLabel" = "Best Hold";
+"practiceSessionRepsResultLabel" = "Total Reps";
+"practiceSessionSecondsUnit" = "sec";
+"practiceSessionRepsUnit" = "reps";
+"practiceSessionSetsLabel" = "Sets Completed";
+"practiceSessionPlannedTitle" = "Planned session";
 "practiceSessionNotesLabel" = "Notes (optional)";
 "practiceSessionNotesPlaceholder" = "How did it go?";
 "practiceSessionSubmitButton" = "Log Session";
@@ -28,6 +53,83 @@
 /* Profile */
 "profileTitle" = "Profile";
 "profileLogSessionButton" = "Log a Session";
+"profile_placeholder" = "Profile tools come after the academy loop is stable.";
+
+/* Skill Levels */
+"skill_level_beginner" = "Beginner";
+"skill_level_intermediate" = "Intermediate";
+"skill_level_advanced" = "Advanced";
+
+/* Plan coaching notes */
+"plan_note_handstand_beginner" = "Focus on wall support and hollow body alignment.";
+"plan_note_handstand_intermediate" = "Work toward freestanding balance. Keep elbows locked.";
+"plan_note_handstand_advanced" = "Aim for consistent freestanding holds with minimal corrections.";
+"plan_note_pullups_beginner" = "Full dead hang. Pull until chin clears the bar.";
+"plan_note_pullups_intermediate" = "Slow the negative. 3 seconds down.";
+"plan_note_pullups_advanced" = "Add weight or move toward archer pull-ups.";
+"plan_note_hspu_beginner" = "Use a wall. Head touches the floor on each rep.";
+"plan_note_hspu_intermediate" = "Increase range of motion. Use parallettes if available.";
+"plan_note_hspu_advanced" = "Work toward freestanding HSPU. Minimize wall contact.";
+
+/* Onboarding */
+"onboarding_welcome_subtitle" = "A skills academy for serious training.";
+"onboarding_begin_button" = "Begin Training";
+"onboarding_continue_button" = "Continue";
+"onboarding_back_button" = "Back";
+"onboarding_skill_selection_title" = "What skills do you want to train?";
+"onboarding_skill_selection_subtitle" = "Select one or more skills to build your plan.";
+"onboarding_level_title" = "What's your current level?";
+"onboarding_level_subtitle" = "Be honest — the plan adapts over time.";
+"onboarding_frequency_title" = "How often can you train?";
+"onboarding_frequency_subtitle" = "You can change this anytime.";
+"onboarding_per_week_label" = "per week";
+"onboarding_summary_title" = "Your plan is ready.";
+"onboarding_summary_subtitle" = "We've built a personalized training plan for each skill.";
+"onboarding_start_training_button" = "Start Training";
+
+/* Skill detail */
+"skillDetailStartSession" = "Start Session";
+"skillDetailProgramTitle" = "Current program";
+"skillDetailProgramMissing" = "This skill is not active yet.";
+"skillDetailStatsTitle" = "Progress";
+"skillDetailSessions" = "Sessions";
+"skillDetailStreak" = "Streak";
+"skillDetailCompletion" = "Completion";
+"skillDetailPR" = "PR";
+"skillDetailProgressTitle" = "Logged sessions";
+"skillDetailSettingsTitle" = "Training settings";
+"skillDetailActiveToggle" = "Keep this skill active";
+"skillDetailLevelLabel" = "Level";
+"skillDetailFrequencyLabel" = "Frequency";
+"skillDetailSaveSettings" = "Save Settings";
+
+/* Workout */
+"workout_mode_title" = "Choose Timer Mode";
+"workout_mode_subtitle" = "How do you want to track your session?";
+"workout_mode_smart_title" = "Smart";
+"workout_mode_smart_subtitle" = "Tracks your session with the camera.";
+"workout_mode_manual_title" = "Manual";
+"workout_mode_manual_subtitle" = "You control start and stop.";
+"workout_mode_manual_only" = "Manual timing is available for this skill right now.";
+"workout_mode_camera_only" = "This skill uses camera tracking only.";
+"workout_status_scanning" = "SCANNING...";
+"workout_status_active" = "SESSION LIVE";
+"workout_status_paused" = "PAUSED";
+"workout_status_done" = "DONE";
+"workout_status_error" = "ERROR:";
+"workout_start_manual" = "Start Manually";
+"workout_auto_detect_hint" = "The camera will track the movement for you.";
+"workout_auto_count_reps_hint" = "The camera will count each rep automatically.";
+"workout_manual_start_hint" = "Start when you're ready and stop after the set.";
+"workout_stop_save" = "Stop & Save";
+"workout_reps_label" = "REPS";
+"workout_no_camera_simulator" = "No camera on simulator";
+"workout_use_manual" = "Use manual controls below.";
+"workout_camera_required" = "Camera tracking is required for this skill.";
+"workout_starting_camera" = "Starting camera...";
+"workout_error_camera_denied" = "Camera access denied";
+"workout_error_no_camera" = "No camera available";
+"workout_error_smart_unavailable" = "Smart tracking is unavailable for this skill.";
 
 /* General */
 "loadingLabel" = "Loading...";

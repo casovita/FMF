@@ -17,7 +17,7 @@ struct AppShellView: View {
                 .tag(AppTab.skills)
 
                 NavigationStack {
-                    ProgressView()
+                    ProgressScreenView()
                 }
                 .tag(AppTab.progress)
 

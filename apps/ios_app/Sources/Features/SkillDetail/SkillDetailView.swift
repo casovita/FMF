@@ -2,7 +2,10 @@ import SwiftUI
 
 struct SkillDetailView: View {
     let skillId: String
-    @Environment(\.skillRepository) private var repo
+    @Environment(\.skillRepository) private var skillRepo
+    @Environment(\.userSkillRepository) private var userSkillRepo
+    @Environment(\.trainingProgramRepository) private var trainingProgramRepo
+    @Environment(\.practiceSessionRepository) private var sessionRepo
     @State private var vm: SkillDetailViewModel?
     @State private var showWorkout = false
     @State private var showPracticeSession = false
@@ -16,9 +19,14 @@ struct SkillDetailView: View {
                     if vm.isLoading {
                         ProgressView().tint(FMFColors.brandAccent)
                     } else if let error = vm.errorMessage {
-                        Text("Error: \(error)")
-                            .foregroundStyle(.white)
-                            .padding()
+                        VStack(spacing: FMFSpacing.xs) {
+                            Text(String(localized: "errorGeneric"))
+                                .foregroundStyle(.white)
+                            Text(verbatim: error)
+                                .font(FMFTypography.bodySmall)
+                                .foregroundStyle(FMFColors.neutral500)
+                        }
+                        .padding()
                     } else if let skill = vm.skill {
                         skillContent(skill: skill)
                     }
@@ -28,17 +36,23 @@ struct SkillDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
         .task {
-            let viewModel = SkillDetailViewModel(skillId: skillId, repo: repo)
+            let viewModel = SkillDetailViewModel(
+                skillId: skillId,
+                skillRepo: skillRepo,
+                userSkillRepo: userSkillRepo,
+                trainingProgramRepo: trainingProgramRepo,
+                sessionRepo: sessionRepo
+            )
             vm = viewModel
             async let load: Void = viewModel.load()
             async let watch: Void = viewModel.watchProgress()
             _ = await (load, watch)
         }
         .fullScreenCover(isPresented: $showWorkout) {
-            WorkoutView(skillId: skillId)
+            WorkoutView(skillId: skillId, plannedSession: vm?.nextPlannedSession)
         }
         .navigationDestination(isPresented: $showPracticeSession) {
-            PracticeSessionView()
+            PracticeSessionView(skillId: skillId, plannedSession: vm?.nextPlannedSession)
         }
     }
 
@@ -56,47 +70,35 @@ struct SkillDetailView: View {
 
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                // Category chip
                 CategoryChip(category: skill.category, color: catColor)
                     .padding(.bottom, FMFSpacing.sm)
 
-                // Name
                 Text(skill.name)
                     .font(FMFTypography.headlineMedium)
                     .fontWeight(.bold)
                     .foregroundStyle(.white)
                     .padding(.bottom, FMFSpacing.sm)
 
-                // Description
                 Text(skill.description)
                     .font(FMFTypography.bodyLarge)
                     .foregroundStyle(FMFColors.neutral300)
                     .padding(.bottom, FMFSpacing.xl)
 
-                // Progression tracks placeholder
-                VStack(alignment: .leading, spacing: FMFSpacing.xs) {
-                    Text("Progression Tracks")
-                        .font(FMFTypography.titleMedium)
-                        .foregroundStyle(.white)
-                    Text("Coming in the next iteration.")
-                        .font(FMFTypography.bodyMedium)
-                        .foregroundStyle(FMFColors.neutral500)
-                }
-                .padding(FMFSpacing.md)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(FMFColors.darkSurface)
-                .clipShape(RoundedRectangle(cornerRadius: FMFRadius.lg))
-                .overlay {
-                    RoundedRectangle(cornerRadius: FMFRadius.lg)
-                        .strokeBorder(catColor.opacity(0.3), lineWidth: 1)
-                }
-                .padding(.bottom, FMFSpacing.xl)
+                if let vm {
+                    SkillProgramCard(vm: vm, color: catColor)
+                        .padding(.bottom, FMFSpacing.lg)
 
-                // Start Workout button
+                    SkillStatsCard(vm: vm)
+                        .padding(.bottom, FMFSpacing.lg)
+
+                    SkillSettingsCard(vm: vm)
+                        .padding(.bottom, FMFSpacing.xl)
+                }
+
                 Button {
-                    showWorkout = true
+                    startPrimarySession(for: skill)
                 } label: {
-                    Text("Start Workout")
+                    Text(String(localized: "skillDetailStartSession"))
                         .font(FMFTypography.titleMedium)
                         .fontWeight(.semibold)
                         .foregroundStyle(.white)
@@ -107,7 +109,6 @@ struct SkillDetailView: View {
                 }
                 .padding(.bottom, FMFSpacing.md)
 
-                // Log Session button
                 Button {
                     showPracticeSession = true
                 } label: {
@@ -128,6 +129,173 @@ struct SkillDetailView: View {
             }
             .padding(FMFSpacing.md)
         }
+    }
+
+    private func startPrimarySession(for skill: Skill) {
+        showWorkout = true
+    }
+}
+
+private struct SkillProgramCard: View {
+    let vm: SkillDetailViewModel
+    let color: Color
+
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter
+    }()
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: FMFSpacing.sm) {
+            Text(String(localized: "skillDetailProgramTitle"))
+                .font(FMFTypography.titleMedium)
+                .foregroundStyle(.white)
+
+            if let userSkill = vm.userSkill {
+                Text("\(userSkill.level.displayName) • \(userSkill.weeklyFrequency)x \(String(localized: "onboarding_per_week_label"))")
+                    .font(FMFTypography.bodyMedium)
+                    .foregroundStyle(FMFColors.neutral300)
+            } else {
+                Text(String(localized: "skillDetailProgramMissing"))
+                    .font(FMFTypography.bodyMedium)
+                    .foregroundStyle(FMFColors.neutral500)
+            }
+
+            if let next = vm.nextPlannedSession {
+                Text(next.prescription.displayString)
+                    .font(FMFTypography.headlineSmall)
+                    .foregroundStyle(.white)
+                Text(next.prescription.notes)
+                    .font(FMFTypography.bodySmall)
+                    .foregroundStyle(FMFColors.neutral500)
+                Text(Self.dateFormatter.string(from: next.scheduledDate))
+                    .font(FMFTypography.bodySmall)
+                    .foregroundStyle(color)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(FMFSpacing.md)
+        .background(FMFColors.darkSurface)
+        .clipShape(RoundedRectangle(cornerRadius: FMFRadius.lg))
+        .overlay {
+            RoundedRectangle(cornerRadius: FMFRadius.lg)
+                .strokeBorder(color.opacity(0.3), lineWidth: 1)
+        }
+    }
+}
+
+private struct SkillStatsCard: View {
+    let vm: SkillDetailViewModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: FMFSpacing.md) {
+            Text(String(localized: "skillDetailStatsTitle"))
+                .font(FMFTypography.titleMedium)
+                .foregroundStyle(.white)
+
+            if let stats = vm.stats {
+                HStack {
+                    SkillMetricView(label: String(localized: "skillDetailSessions"), value: "\(stats.totalSessions)")
+                    SkillMetricView(label: String(localized: "skillDetailStreak"), value: "\(stats.currentStreak)")
+                }
+                HStack {
+                    SkillMetricView(label: String(localized: "skillDetailCompletion"), value: "\(Int((stats.weeklyCompletionRate * 100).rounded()))%")
+                    SkillMetricView(label: String(localized: "skillDetailPR"), value: stats.personalRecord?.displayString ?? String(localized: "home_stats_none"))
+                }
+            }
+
+            if let progress = vm.progress {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(String(localized: "skillDetailProgressTitle"))
+                        .font(FMFTypography.bodySmall)
+                        .foregroundStyle(FMFColors.neutral500)
+                    Text("\(progress.practiceCount)")
+                        .font(FMFTypography.titleSmall)
+                        .foregroundStyle(.white)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(FMFSpacing.md)
+        .background(FMFColors.darkSurface.opacity(0.85))
+        .clipShape(RoundedRectangle(cornerRadius: FMFRadius.lg))
+    }
+}
+
+private struct SkillMetricView: View {
+    let label: String
+    let value: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(FMFTypography.bodySmall)
+                .foregroundStyle(FMFColors.neutral500)
+            Text(value)
+                .font(FMFTypography.titleMedium)
+                .foregroundStyle(.white)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct SkillSettingsCard: View {
+    @Bindable var vm: SkillDetailViewModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: FMFSpacing.md) {
+            Text(String(localized: "skillDetailSettingsTitle"))
+                .font(FMFTypography.titleMedium)
+                .foregroundStyle(.white)
+
+            Toggle(isOn: $vm.isActive) {
+                Text(String(localized: "skillDetailActiveToggle"))
+                    .font(FMFTypography.bodyMedium)
+                    .foregroundStyle(.white)
+            }
+            .tint(FMFColors.brandAccent)
+
+            Picker(String(localized: "skillDetailLevelLabel"), selection: $vm.selectedLevel) {
+                ForEach(SkillLevel.allCases, id: \.self) { level in
+                    Text(level.displayName).tag(level)
+                }
+            }
+            .pickerStyle(.segmented)
+
+            Stepper(
+                value: $vm.weeklyFrequency,
+                in: 2...5
+            ) {
+                Text("\(String(localized: "skillDetailFrequencyLabel")) \(vm.weeklyFrequency)x")
+                    .font(FMFTypography.bodyMedium)
+                    .foregroundStyle(.white)
+            }
+
+            Button {
+                Task { await vm.saveSettings() }
+            } label: {
+                Group {
+                    if vm.isSaving {
+                        ProgressView().tint(.white)
+                    } else {
+                        Text(String(localized: "skillDetailSaveSettings"))
+                            .font(FMFTypography.labelMedium)
+                            .foregroundStyle(.white)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, FMFSpacing.sm)
+                .background(FMFColors.brandAccent)
+                .clipShape(RoundedRectangle(cornerRadius: FMFRadius.md))
+            }
+            .buttonStyle(.plain)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(FMFSpacing.md)
+        .background(FMFColors.darkSurface)
+        .clipShape(RoundedRectangle(cornerRadius: FMFRadius.lg))
     }
 }
 

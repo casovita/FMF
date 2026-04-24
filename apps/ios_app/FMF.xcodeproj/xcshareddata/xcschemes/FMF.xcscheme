@@ -50,6 +50,17 @@
                ReferencedContainer = "container:FMF.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "9B355259CFC2E129DDCD5989"
+               BuildableName = "FMFUITests.xctest"
+               BlueprintName = "FMFUITests"
+               ReferencedContainer = "container:FMF.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

@@ -3,9 +3,19 @@ import AVFoundation
 
 struct WorkoutView: View {
     let skillId: String
+    let plannedSession: PlannedSession?
+
     @Environment(\.practiceSessionRepository) private var repo
+    @Environment(\.skillRepository) private var skillRepo
+    @Environment(\.trainingProgramRepository) private var trainingProgramRepo
     @Environment(\.dismiss) private var dismiss
     @State private var vm: WorkoutViewModel?
+    @State private var skill: Skill?
+
+    init(skillId: String, plannedSession: PlannedSession? = nil) {
+        self.skillId = skillId
+        self.plannedSession = plannedSession
+    }
 
     var body: some View {
         Group {
@@ -14,15 +24,27 @@ struct WorkoutView: View {
                     .onChange(of: vm.state) { _, newState in
                         if case .complete(let total) = newState {
                             vm.cleanup()
-                            dismiss()
-                            // Toast shown by parent — pass total via notification or callback if needed
                             _ = total
+                            dismiss()
                         }
                     }
             }
         }
         .task {
-            let viewModel = WorkoutViewModel(skillId: skillId, repo: repo)
+            let loadedSkill = try? await skillRepo.getSkillById(skillId)
+            skill = loadedSkill
+            let completionService = PracticeSessionCompletionService(
+                sessionRepo: repo,
+                skillRepo: skillRepo,
+                trainingProgramRepo: trainingProgramRepo
+            )
+            let viewModel = WorkoutViewModel(
+                skillId: skillId,
+                prescriptionType: loadedSkill?.prescriptionType ?? .duration,
+                completionService: completionService,
+                plannedSession: plannedSession,
+                supportsSmartTracking: loadedSkill.map(supportsSmartTracking(for:)) ?? false
+            )
             vm = viewModel
         }
         .onDisappear {
@@ -34,11 +56,24 @@ struct WorkoutView: View {
     private func content(vm: WorkoutViewModel) -> some View {
         switch vm.state {
         case .modeSelection:
-            ModeSelectionView { mode in
+            ModeSelectionView(
+                showsSmartTracking: true,
+                showsManualTracking: vm.allowsManualMode,
+                onBack: { dismiss() }
+            ) { mode in
                 Task { await vm.selectMode(mode) }
             }
         default:
             WorkoutCameraView(vm: vm, dismiss: { dismiss() })
+        }
+    }
+
+    private func supportsSmartTracking(for skill: Skill) -> Bool {
+        switch skill.id {
+        case "handstand", "pullups", "handstand_pushups":
+            return true
+        default:
+            return false
         }
     }
 }
@@ -46,54 +81,82 @@ struct WorkoutView: View {
 // MARK: - Mode selection
 
 private struct ModeSelectionView: View {
+    let showsSmartTracking: Bool
+    let showsManualTracking: Bool
+    let onBack: () -> Void
     let onSelect: (WorkoutMode) -> Void
 
     var body: some View {
-        ZStack {
-            Color(hex: 0x0D1628).ignoresSafeArea()
+        GeometryReader { proxy in
+            ZStack {
+                Color(hex: 0x0D1628).ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                Spacer().frame(height: FMFSpacing.xl)
+                VStack(spacing: 0) {
+                    HStack {
+                        GlassIconButton(
+                            systemImage: "chevron.backward",
+                            accessibilityIdentifier: "workout.backButton"
+                        ) { onBack() }
+                        Spacer()
+                    }
+                    .padding(.top, proxy.safeAreaInsets.top + FMFSpacing.sm)
 
-                Text("Choose Timer Mode")
-                    .font(FMFTypography.headlineSmall)
-                    .fontWeight(.bold)
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
+                    Spacer().frame(height: FMFSpacing.lg)
 
-                Spacer().frame(height: FMFSpacing.xs)
+                    Text(String(localized: "workout_mode_title"))
+                        .font(FMFTypography.headlineSmall)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
 
-                Text("How do you want to track your session?")
-                    .font(FMFTypography.bodyMedium)
-                    .foregroundStyle(FMFColors.neutral500)
-                    .multilineTextAlignment(.center)
+                    Spacer().frame(height: FMFSpacing.xs)
 
-                Spacer().frame(height: FMFSpacing.xl)
+                    Text(String(localized: "workout_mode_subtitle"))
+                        .font(FMFTypography.bodyMedium)
+                        .foregroundStyle(FMFColors.neutral500)
+                        .multilineTextAlignment(.center)
 
-                ModeCard(
-                    systemImage: "sparkles",
-                    title: "Smart",
-                    subtitle: "Auto-detects your handstand via camera",
-                    color: FMFColors.skillBalance
-                ) { onSelect(.smart) }
+                    Spacer().frame(height: FMFSpacing.xl)
 
-                Spacer().frame(height: FMFSpacing.md)
+                    if showsSmartTracking {
+                        ModeCard(
+                            accessibilityIdentifier: "workout.mode.smart",
+                            systemImage: "sparkles",
+                            title: String(localized: "workout_mode_smart_title"),
+                            subtitle: String(localized: "workout_mode_smart_subtitle"),
+                            color: FMFColors.skillBalance
+                        ) { onSelect(.smart) }
 
-                ModeCard(
-                    systemImage: "hand.tap",
-                    title: "Manual",
-                    subtitle: "You control start & stop",
-                    color: FMFColors.brandAccent
-                ) { onSelect(.manual) }
+                        if showsManualTracking {
+                            Spacer().frame(height: FMFSpacing.md)
+                        }
+                    }
 
-                Spacer()
+                    if showsManualTracking {
+                        ModeCard(
+                            accessibilityIdentifier: "workout.mode.manual",
+                            systemImage: "hand.tap",
+                            title: String(localized: "workout_mode_manual_title"),
+                            subtitle: String(localized: "workout_mode_manual_subtitle"),
+                            color: FMFColors.brandAccent
+                        ) { onSelect(.manual) }
+                    } else {
+                        Text(String(localized: "workout_mode_camera_only"))
+                            .font(FMFTypography.bodySmall)
+                            .foregroundStyle(FMFColors.neutral500)
+                            .multilineTextAlignment(.center)
+                    }
+
+                    Spacer()
+                }
+                .padding(.horizontal, FMFSpacing.lg)
             }
-            .padding(.horizontal, FMFSpacing.lg)
         }
     }
 }
 
 private struct ModeCard: View {
+    let accessibilityIdentifier: String
     let systemImage: String
     let title: String
     let subtitle: String
@@ -141,6 +204,7 @@ private struct ModeCard: View {
             }
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier(accessibilityIdentifier)
     }
 }
 
@@ -157,7 +221,7 @@ private struct WorkoutCameraView: View {
                 CameraPreviewView(session: session)
                     .ignoresSafeArea()
             } else {
-                ScanningPlaceholder()
+                ScanningPlaceholder(vm: vm)
             }
 
             // Top gradient
@@ -185,32 +249,34 @@ private struct WorkoutCameraView: View {
             .ignoresSafeArea()
 
             // UI overlay
-            SafeAreaOverlay(vm: vm, dismiss: dismiss)
+            SafeAreaOverlay(vm: vm)
         }
         .background(Color.black)
         .ignoresSafeArea()
+        .safeAreaInset(edge: .top) {
+            HStack {
+                GlassIconButton(
+                    systemImage: "chevron.backward",
+                    accessibilityIdentifier: "workout.backButton"
+                ) { dismiss() }
+                Spacer()
+            }
+            .padding(.horizontal, FMFSpacing.md)
+            .padding(.top, FMFSpacing.sm)
+        }
     }
 }
 
 private struct SafeAreaOverlay: View {
     let vm: WorkoutViewModel
-    let dismiss: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
-            // Back button
-            HStack {
-                GlassIconButton(systemImage: "chevron.backward") { dismiss() }
-                Spacer()
-            }
-            .padding(.horizontal, FMFSpacing.md)
-            .padding(.top, FMFSpacing.sm)
-
             Spacer()
 
             StatusBadge(state: vm.state)
             Spacer().frame(height: FMFSpacing.md)
-            TimerDisplay(state: vm.state)
+            WorkoutMetricDisplay(vm: vm)
             Spacer().frame(height: FMFSpacing.xl)
             ActionButtons(state: vm.state, vm: vm)
             Spacer().frame(height: 40)
@@ -227,11 +293,11 @@ private struct StatusBadge: View {
     private var labelAndColor: (String, Color) {
         switch state {
         case .modeSelection:                 return ("", FMFColors.neutral300)
-        case .idle:                          return ("SCANNING...", FMFColors.neutral300)
-        case .active:                        return ("HANDSTAND ●", FMFColors.skillBalance)
-        case .paused:                        return ("PAUSED", FMFColors.warning)
-        case .complete:                      return ("DONE", FMFColors.success)
-        case .error(let msg):                return ("ERROR: \(msg)", FMFColors.error)
+        case .idle:                          return (String(localized: "workout_status_scanning"), FMFColors.neutral300)
+        case .active:                        return (String(localized: "workout_status_active"), FMFColors.skillBalance)
+        case .paused:                        return (String(localized: "workout_status_paused"), FMFColors.warning)
+        case .complete:                      return (String(localized: "workout_status_done"), FMFColors.success)
+        case .error(let msg):                return ("\(String(localized: "workout_status_error")) \(msg)", FMFColors.error)
         }
     }
 
@@ -250,23 +316,37 @@ private struct StatusBadge: View {
             .clipShape(Capsule())
             .overlay { Capsule().strokeBorder(color.opacity(0.4), lineWidth: 1) }
             .shadow(color: isActive ? color.opacity(0.4) : .clear, radius: 20)
+            .accessibilityIdentifier("workout.camera.status")
     }
 }
 
 // MARK: - Timer display
 
-private struct TimerDisplay: View {
-    let state: WorkoutState
+private struct WorkoutMetricDisplay: View {
+    let vm: WorkoutViewModel
 
     var body: some View {
-        let seconds = state.elapsedSeconds
-        let mm = String(format: "%02d", seconds / 60)
-        let ss = String(format: "%02d", seconds % 60)
+        if vm.usesRepCounting {
+            VStack(spacing: 8) {
+                Text("\(vm.repCount)")
+                    .font(.system(size: 64, weight: .bold).monospacedDigit())
+                    .foregroundStyle(.white)
+                Text(String(localized: "workout_reps_label"))
+                    .font(FMFTypography.labelMedium)
+                    .foregroundStyle(FMFColors.neutral300)
+            }
+            .accessibilityIdentifier("workout.camera.metric")
+        } else {
+            let seconds = vm.state.elapsedSeconds
+            let mm = String(format: "%02d", seconds / 60)
+            let ss = String(format: "%02d", seconds % 60)
 
-        Text("\(mm):\(ss)")
-            .font(.system(size: 57, weight: .ultraLight).monospacedDigit())
-            .tracking(6)
-            .foregroundStyle(.white)
+            Text("\(mm):\(ss)")
+                .font(.system(size: 57, weight: .ultraLight).monospacedDigit())
+                .tracking(6)
+                .foregroundStyle(.white)
+                .accessibilityIdentifier("workout.camera.metric")
+        }
     }
 }
 
@@ -280,20 +360,22 @@ private struct ActionButtons: View {
         switch state {
         case .idle:
             VStack(spacing: FMFSpacing.sm) {
-                GlassPillButton(
-                    label: "Start Manually",
-                    systemImage: "play.fill",
-                    color: FMFColors.brandAccent
-                ) { vm.manualStart() }
+                if vm.shouldShowManualStart {
+                    GlassPillButton(
+                        label: String(localized: "workout_start_manual"),
+                        systemImage: "play.fill",
+                        color: FMFColors.brandAccent
+                    ) { vm.manualStart() }
+                }
 
-                Text("or go into a handstand — auto-detected")
+                Text(vm.statusHint)
                     .font(FMFTypography.bodySmall)
                     .foregroundStyle(.white.opacity(0.4))
             }
 
         case .active, .paused:
             GlassPillButton(
-                label: "Stop & Save",
+                label: String(localized: "workout_stop_save"),
                 systemImage: "stop.fill",
                 color: FMFColors.error
             ) { Task { await vm.stopSession() } }
@@ -336,6 +418,7 @@ private struct GlassPillButton: View {
 
 private struct GlassIconButton: View {
     let systemImage: String
+    let accessibilityIdentifier: String?
     let onTap: () -> Void
 
     var body: some View {
@@ -352,19 +435,34 @@ private struct GlassIconButton: View {
                 }
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier(accessibilityIdentifier ?? "")
     }
 }
 
 private struct ScanningPlaceholder: View {
+    let vm: WorkoutViewModel
+
     var body: some View {
         ZStack {
             Color(hex: 0x0D1628).ignoresSafeArea()
             VStack(spacing: FMFSpacing.md) {
-                ProgressView()
-                    .tint(FMFColors.brandAccent)
-                Text("Starting camera...")
+                #if targetEnvironment(simulator)
+                Image(systemName: "camera.slash")
+                    .font(.system(size: 40))
+                    .foregroundStyle(FMFColors.neutral500)
+                Text(String(localized: "workout_no_camera_simulator"))
                     .font(FMFTypography.bodyMedium)
                     .foregroundStyle(FMFColors.neutral300)
+                Text(vm.allowsManualMode ? String(localized: "workout_use_manual") : String(localized: "workout_camera_required"))
+                    .font(FMFTypography.bodySmall)
+                    .foregroundStyle(FMFColors.neutral500)
+                #else
+                ProgressView()
+                    .tint(FMFColors.brandAccent)
+                Text(String(localized: "workout_starting_camera"))
+                    .font(FMFTypography.bodyMedium)
+                    .foregroundStyle(FMFColors.neutral300)
+                #endif
             }
         }
     }

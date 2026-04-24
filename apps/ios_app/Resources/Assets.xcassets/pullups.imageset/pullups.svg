@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <g fill="none" stroke="#424343" stroke-linecap="round" stroke-linejoin="round" stroke-width="6">
+    <path d="M22 28h84"/>
+    <path d="M30 28v14"/>
+    <path d="M98 28v14"/>
+    <path d="M52 28v16"/>
+    <path d="M76 28v16"/>
+    <circle cx="64" cy="54" r="8" fill="#424343" stroke="none"/>
+    <path d="M64 62v22"/>
+    <path d="M64 72l-20-16"/>
+    <path d="M64 72l20-16"/>
+    <path d="M64 84l-16 20"/>
+    <path d="M64 84l16 20"/>
+  </g>
+</svg>

@@ -1,11 +1,22 @@
 import SwiftUI
 
 struct PracticeSessionView: View {
+    let skillId: String?
+    let plannedSession: PlannedSession?
+    let initialDurationMinutes: Int?
+
     @Environment(\.skillRepository) private var skillRepo
     @Environment(\.practiceSessionRepository) private var sessionRepo
+    @Environment(\.trainingProgramRepository) private var trainingProgramRepo
     @Environment(\.dismiss) private var dismiss
     @State private var vm: PracticeSessionViewModel?
     @State private var skills: [Skill] = []
+
+    init(skillId: String? = nil, plannedSession: PlannedSession? = nil, initialDurationMinutes: Int? = nil) {
+        self.skillId = skillId
+        self.plannedSession = plannedSession
+        self.initialDurationMinutes = initialDurationMinutes
+    }
 
     var body: some View {
         ZStack {
@@ -26,7 +37,18 @@ struct PracticeSessionView: View {
         .task {
             let loaded = (try? await skillRepo.getSkills()) ?? []
             skills = loaded
-            vm = PracticeSessionViewModel(repo: sessionRepo, skills: loaded)
+            let completionService = PracticeSessionCompletionService(
+                sessionRepo: sessionRepo,
+                skillRepo: skillRepo,
+                trainingProgramRepo: trainingProgramRepo
+            )
+            vm = PracticeSessionViewModel(
+                skills: loaded,
+                completionService: completionService,
+                selectedSkillId: skillId,
+                plannedSession: plannedSession,
+                initialDurationMinutes: initialDurationMinutes
+            )
         }
     }
 
@@ -34,6 +56,19 @@ struct PracticeSessionView: View {
     private func form(vm: PracticeSessionViewModel) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: FMFSpacing.lg) {
+                if let summary = vm.plannedSummary {
+                    VStack(alignment: .leading, spacing: FMFSpacing.xs) {
+                        Text(String(localized: "practiceSessionPlannedTitle"))
+                            .font(FMFTypography.labelLarge)
+                            .foregroundStyle(FMFColors.neutral300)
+                        Text(summary)
+                            .font(FMFTypography.titleMedium)
+                            .foregroundStyle(.white)
+                    }
+                    .padding(FMFSpacing.md)
+                    .background(FMFColors.darkSurface)
+                    .clipShape(RoundedRectangle(cornerRadius: FMFRadius.lg))
+                }
 
                 // Skill picker
                 VStack(alignment: .leading, spacing: FMFSpacing.xs) {
@@ -43,7 +78,7 @@ struct PracticeSessionView: View {
 
                     Picker(String(localized: "practiceSessionSkillLabel"), selection: Binding(
                         get: { vm.selectedSkillId },
-                        set: { vm.selectedSkillId = $0 }
+                        set: { vm.updateSelectedSkill($0) }
                     )) {
                         ForEach(vm.availableSkills) { skill in
                             Text(skill.name).tag(skill.id)
@@ -55,6 +90,8 @@ struct PracticeSessionView: View {
                 .padding(FMFSpacing.md)
                 .background(FMFColors.darkSurface)
                 .clipShape(RoundedRectangle(cornerRadius: FMFRadius.lg))
+                .opacity(vm.isSkillLocked ? 0.6 : 1.0)
+                .disabled(vm.isSkillLocked)
 
                 // Duration stepper
                 VStack(alignment: .leading, spacing: FMFSpacing.xs) {
@@ -75,6 +112,58 @@ struct PracticeSessionView: View {
                                 set: { vm.durationMinutes = $0 }
                             ),
                             in: 1...240
+                        )
+                        .labelsHidden()
+                    }
+                }
+                .padding(FMFSpacing.md)
+                .background(FMFColors.darkSurface)
+                .clipShape(RoundedRectangle(cornerRadius: FMFRadius.lg))
+
+                VStack(alignment: .leading, spacing: FMFSpacing.xs) {
+                    Label(vm.performanceLabel, systemImage: "chart.bar.xaxis")
+                        .font(FMFTypography.labelLarge)
+                        .foregroundStyle(FMFColors.neutral300)
+
+                    HStack {
+                        Text("\(vm.performanceValue) \(vm.performanceUnit)")
+                            .font(FMFTypography.titleLarge)
+                            .foregroundStyle(.white)
+                            .monospacedDigit()
+                        Spacer()
+                        Stepper(
+                            "",
+                            value: Binding(
+                                get: { vm.performanceValue },
+                                set: { vm.performanceValue = $0 }
+                            ),
+                            in: 1...600
+                        )
+                        .labelsHidden()
+                    }
+                }
+                .padding(FMFSpacing.md)
+                .background(FMFColors.darkSurface)
+                .clipShape(RoundedRectangle(cornerRadius: FMFRadius.lg))
+
+                VStack(alignment: .leading, spacing: FMFSpacing.xs) {
+                    Label(String(localized: "practiceSessionSetsLabel"), systemImage: "number")
+                        .font(FMFTypography.labelLarge)
+                        .foregroundStyle(FMFColors.neutral300)
+
+                    HStack {
+                        Text("\(vm.setsCompleted)")
+                            .font(FMFTypography.titleLarge)
+                            .foregroundStyle(.white)
+                            .monospacedDigit()
+                        Spacer()
+                        Stepper(
+                            "",
+                            value: Binding(
+                                get: { vm.setsCompleted },
+                                set: { vm.setsCompleted = $0 }
+                            ),
+                            in: 1...20
                         )
                         .labelsHidden()
                     }

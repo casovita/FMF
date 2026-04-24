@@ -13,7 +13,16 @@ struct SkillCardView: View {
     }
 
     private var iconName: String? {
-        skill.id == "handstand" ? "handstand" : nil
+        switch skill.id {
+        case "handstand":
+            "handstand"
+        case "pullups":
+            "pullups"
+        case "handstand_pushups":
+            "handstand_pushups"
+        default:
+            nil
+        }
     }
 
     var body: some View {

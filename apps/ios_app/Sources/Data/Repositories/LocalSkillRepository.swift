@@ -10,19 +10,22 @@ final class LocalSkillRepository: SkillRepository {
             id: "handstand",
             name: "Handstand",
             description: "Build balance, body tension, and overhead strength.",
-            category: .balance
+            category: .balance,
+            prescriptionType: .duration
         ),
         Skill(
             id: "pullups",
             name: "Pull-ups",
             description: "Develop pulling strength and scapular control.",
-            category: .strength
+            category: .strength,
+            prescriptionType: .reps
         ),
         Skill(
             id: "handstand_pushups",
             name: "Handstand Push-ups",
             description: "Master overhead pressing strength and balance combined.",
-            category: .bodyweight
+            category: .bodyweight,
+            prescriptionType: .reps
         ),
     ]
 
@@ -36,6 +39,23 @@ final class LocalSkillRepository: SkillRepository {
 
     func getSkillById(_ id: String) async throws -> Skill? {
         Self.catalog.first { $0.id == id }
+    }
+
+    func getProgressSnapshot(skillId: String) async throws -> ProgressSnapshot? {
+        try await db.dbWriter.read { db in
+            try SkillProgressRecord
+                .filter(Column("skillId") == skillId)
+                .order(Column("snapshotDate").desc)
+                .fetchOne(db)?
+                .asDomain
+        }
+    }
+
+    func saveProgressSnapshot(_ snapshot: ProgressSnapshot) async throws {
+        let record = SkillProgressRecord(from: snapshot)
+        try await db.dbWriter.write { db in
+            try record.save(db)
+        }
     }
 
     func skillProgressStream(skillId: String) -> AsyncStream<ProgressSnapshot?> {

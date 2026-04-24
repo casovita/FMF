@@ -10,6 +10,10 @@ struct PracticeSessionRecord: FetchableRecord, PersistableRecord, TableRecord {
     var durationMinutes: Int
     var notes: String?
     var completedAt: Date?
+    var setsCompleted: Int
+    var plannedSessionId: String?
+    var isPersonalRecord: Bool
+    var sessionScore: Int
 
     init(from session: PracticeSession) {
         id = session.id
@@ -18,6 +22,10 @@ struct PracticeSessionRecord: FetchableRecord, PersistableRecord, TableRecord {
         durationMinutes = session.durationMinutes
         notes = session.notes
         completedAt = session.completedAt
+        setsCompleted = session.setsCompleted
+        plannedSessionId = session.plannedSessionId
+        isPersonalRecord = session.isPersonalRecord
+        sessionScore = session.sessionScore
     }
 
     init(row: Row) {
@@ -30,6 +38,10 @@ struct PracticeSessionRecord: FetchableRecord, PersistableRecord, TableRecord {
         if let completedAtTimestamp: Double = row["completedAt"] {
             completedAt = Date(timeIntervalSince1970: completedAtTimestamp)
         }
+        setsCompleted = row["setsCompleted"] ?? 0
+        plannedSessionId = row["plannedSessionId"]
+        isPersonalRecord = row["isPersonalRecord"] ?? false
+        sessionScore = row["sessionScore"] ?? 0
     }
 
     func encode(to container: inout PersistenceContainer) throws {
@@ -39,6 +51,10 @@ struct PracticeSessionRecord: FetchableRecord, PersistableRecord, TableRecord {
         container["durationMinutes"] = durationMinutes
         container["notes"] = notes
         container["completedAt"] = completedAt?.timeIntervalSince1970
+        container["setsCompleted"] = setsCompleted
+        container["plannedSessionId"] = plannedSessionId
+        container["isPersonalRecord"] = isPersonalRecord
+        container["sessionScore"] = sessionScore
     }
 
     var asDomain: PracticeSession {
@@ -48,7 +64,11 @@ struct PracticeSessionRecord: FetchableRecord, PersistableRecord, TableRecord {
             date: date,
             durationMinutes: durationMinutes,
             notes: notes,
-            completedAt: completedAt
+            completedAt: completedAt,
+            setsCompleted: setsCompleted,
+            plannedSessionId: plannedSessionId,
+            isPersonalRecord: isPersonalRecord,
+            sessionScore: sessionScore
         )
     }
 }

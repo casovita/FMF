@@ -8,12 +8,16 @@ final class WorkoutViewModel {
     private static let gracePeriodSeconds = 3
 
     // Exposed state
-    internal(set) var state: WorkoutState = .modeSelection
+    var state: WorkoutState = .modeSelection
     private(set) var captureSession: AVCaptureSession?
+    var repCount = 0
 
     // Private
     private let skillId: String
-    private let repo: any PracticeSessionRepository
+    private let prescriptionType: PrescriptionType
+    private let completionService: any PracticeSessionCompleting
+    private let plannedSession: PlannedSession?
+    private let supportsSmartTracking: Bool
     private var poseService: PoseDetectionService?
     private var poseStreamTask: Task<Void, Never>?
     private var timerTask: Task<Void, Never>?
@@ -22,39 +26,92 @@ final class WorkoutViewModel {
     var elapsed = 0 // internal for test seam
     private var mode: WorkoutMode = .smart
 
-    init(skillId: String, repo: any PracticeSessionRepository) {
+    init(
+        skillId: String,
+        prescriptionType: PrescriptionType,
+        completionService: any PracticeSessionCompleting,
+        plannedSession: PlannedSession? = nil,
+        supportsSmartTracking: Bool = true
+    ) {
         self.skillId = skillId
-        self.repo = repo
+        self.prescriptionType = prescriptionType
+        self.completionService = completionService
+        self.plannedSession = plannedSession
+        self.supportsSmartTracking = supportsSmartTracking
+    }
+
+    var allowsManualMode: Bool {
+        prescriptionType == .duration
+    }
+
+    var usesRepCounting: Bool {
+        prescriptionType == .reps
+    }
+
+    var shouldShowManualStart: Bool {
+        mode == .manual && allowsManualMode
+    }
+
+    var statusHint: String {
+        if usesRepCounting {
+            return String(localized: "workout_auto_count_reps_hint")
+        }
+        return mode == .manual
+            ? String(localized: "workout_manual_start_hint")
+            : String(localized: "workout_auto_detect_hint")
     }
 
     // MARK: - Mode selection
 
     func selectMode(_ mode: WorkoutMode) async {
+        guard mode != .manual || allowsManualMode else { return }
+        guard mode != .smart || supportsSmartTracking else {
+            state = .error(message: String(localized: "workout_error_smart_unavailable"))
+            return
+        }
         self.mode = mode
-        await initCamera()
+        switch mode {
+        case .manual:
+            enterManualMode()
+        case .smart:
+            await initCamera()
+        }
+    }
+
+    private func enterManualMode() {
+        cleanup()
+        repCount = 0
+        elapsed = 0
+        sessionStart = nil
+        state = .idle
     }
 
     // MARK: - Camera init
 
     private func initCamera() async {
+        #if targetEnvironment(simulator)
+        repCount = 0
+        elapsed = 0
+        sessionStart = nil
+        state = .idle
+        #else
         // Request camera permission
         let status = AVCaptureDevice.authorizationStatus(for: .video)
         if status == .notDetermined {
             _ = await AVCaptureDevice.requestAccess(for: .video)
         }
         guard AVCaptureDevice.authorizationStatus(for: .video) == .authorized else {
-            state = .error(message: "Camera access denied")
+            state = .error(message: String(localized: "workout_error_camera_denied"))
             return
         }
 
-        let service = PoseDetectionService()
+        let service = PoseDetectionService(trackingType: trackingType)
         poseService = service
-        let stream = service.start()
 
-        // Check if session was created (nil = simulator / no camera)
-        try? await Task.sleep(for: .milliseconds(300))
-        if service.captureSession == nil && mode == .smart {
-            state = .error(message: "No camera available")
+        let ready = await service.configure()
+
+        if !ready && mode == .smart {
+            state = .error(message: String(localized: "workout_error_no_camera"))
             return
         }
 
@@ -62,13 +119,15 @@ final class WorkoutViewModel {
         state = .idle
 
         if mode == .smart {
+            let stream = service.stream()
             poseStreamTask = Task { [weak self] in
-                for await isHandstand in stream {
+                for await event in stream {
                     guard let self else { return }
-                    await self.handlePoseEvent(isHandstand)
+                    await self.handlePoseEvent(event)
                 }
             }
         }
+        #endif
     }
 
     // MARK: - Manual controls
@@ -91,12 +150,27 @@ final class WorkoutViewModel {
 
     // MARK: - Pose events (called from poseStreamTask on main actor via await)
 
-    private func handlePoseEvent(_ isHandstand: Bool) async {
-        if isHandstand {
-            onHandstandDetected()
-        } else {
-            onPoseLost()
+    private func handlePoseEvent(_ event: PoseEvent) async {
+        switch event {
+        case .holdDetected(let isHandstand):
+            if isHandstand {
+                onHandstandDetected()
+            } else {
+                onPoseLost()
+            }
+        case .repCount(let count):
+            onRepCountDetected(count)
         }
+    }
+
+    private var trackingType: PoseTrackingType {
+        if prescriptionType == .duration {
+            return .handstandHold
+        }
+        if skillId == "handstand_pushups" {
+            return .handstandPushupReps
+        }
+        return .pullupReps
     }
 
     private func onHandstandDetected() {
@@ -121,6 +195,17 @@ final class WorkoutViewModel {
             let total = self.elapsed
             await self.saveSession()
             self.state = .complete(totalSeconds: total)
+        }
+    }
+
+    private func onRepCountDetected(_ count: Int) {
+        repCount = count
+        cancelGracePeriod()
+        guard case .active = state else {
+            sessionStart = sessionStart ?? Date()
+            startTicker()
+            state = .active(elapsedSeconds: elapsed)
+            return
         }
     }
 
@@ -153,16 +238,28 @@ final class WorkoutViewModel {
     // MARK: - Session persistence
 
     private func saveSession() async {
-        guard elapsed > 0 else { return }
+        let score = prescriptionType == .duration ? elapsed : repCount
+        guard score > 0 else { return }
         let session = PracticeSession(
             id: UUID().uuidString,
             skillId: skillId,
             date: sessionStart ?? Date(),
             durationMinutes: max(1, elapsed / 60),
-            notes: "\(elapsed) sec",
-            completedAt: Date()
+            notes: sessionNotes(score: score),
+            completedAt: Date(),
+            setsCompleted: plannedSession?.prescription.sets ?? 1,
+            plannedSessionId: plannedSession?.id,
+            isPersonalRecord: false,
+            sessionScore: score
         )
-        try? await repo.logSession(session)
+        _ = try? await completionService.completeSession(session)
+    }
+
+    private func sessionNotes(score: Int) -> String {
+        if prescriptionType == .duration {
+            return "\(score) sec"
+        }
+        return "\(score) reps in \(elapsed) sec"
     }
 
     // MARK: - Cleanup

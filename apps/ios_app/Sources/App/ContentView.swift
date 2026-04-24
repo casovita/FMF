@@ -7,7 +7,7 @@ struct RootView: View {
         if didCompleteOnboarding {
             AppShellView()
         } else {
-            OnboardingView()
+            OnboardingFlowView()
         }
     }
 }
