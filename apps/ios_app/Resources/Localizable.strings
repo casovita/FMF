@@ -22,13 +22,6 @@
 "browseTitle" = "All Skills";
 "browse_enrolled" = "Active in your academy";
 "browse_not_enrolled" = "Not active yet";
-"browse_subtitle" = "Follow your current modules now, unlock the next skill in line, and preview the future curriculum ahead.";
-"browse_continue_title" = "Continue Training";
-"browse_continue_subtitle" = "Your active skills stay at the top so today’s curriculum is easy to follow.";
-"browse_unlock_title" = "Unlock Next";
-"browse_unlock_subtitle" = "The next recommended module in your academy path.";
-"browse_future_title" = "Future Curriculum";
-"browse_future_subtitle" = "Skills that come later in the roadmap as your academy expands.";
 "browse_search_prompt" = "Search skills";
 "browse_filter_all" = "All";
 "browse_filter_active" = "Active";
@@ -40,28 +33,7 @@
 "browse_category_bodyweight" = "Bodyweight";
 "browse_filtered_empty_title" = "No skills match these filters.";
 "browse_filtered_empty_subtitle" = "Try a different search or clear one of the filters to see more of the curriculum.";
-"browse_state_active" = "Active";
-"browse_state_available" = "Next Up";
-"browse_state_locked" = "Locked";
-"browse_state_future" = "Future";
-"browse_accessibility_active" = "Active skill";
-"browse_accessibility_available" = "Available next";
-"browse_accessibility_locked" = "Locked skill";
-"browse_accessibility_future" = "Future skill";
-"browse_active_prerequisite" = "Already active in your academy";
-"browse_active_pr_format" = "%1$@: %2$@";
 "browse_active_progress_format" = "%1$d sessions logged";
-"browse_available_prerequisite" = "Ready to add when you want the next module";
-"browse_locked_prerequisite_format" = "Complete %1$@ first";
-"browse_future_prerequisite_format" = "Opens after %1$@";
-"browse_next_session_label" = "Next session";
-"browse_curriculum_label" = "Curriculum";
-"browse_next_session_format" = "%1$@ programmed";
-"browse_frequency_format" = "%1$dx per week cadence";
-"browse_action_continue" = "Continue the current program";
-"browse_action_available" = "Ready to unlock in your academy";
-"browse_action_locked" = "Build the previous module first";
-"browse_action_future" = "Coming later in your academy path";
 "urgency_overdue" = "Overdue";
 "urgency_today" = "Today";
 "urgency_upcoming" = "Upcoming";
@@ -119,10 +91,9 @@
 "sessionSetupModeSoundSubtitle" = "Say start and stop to control the timer hands-free.";
 "sessionSetupModeDurationOnly" = "Available for timed skills.";
 
-/* Profile */
-"profileTitle" = "Profile";
-"profileLogSessionButton" = "Log a Session";
-"profile_placeholder" = "Profile tools come after the academy loop is stable.";
+/* Settings */
+"settingsTitle" = "Settings";
+"settings_placeholder" = "Settings tools come after the academy loop is stable.";
 
 /* Skill Levels */
 "skill_level_beginner" = "Beginner";

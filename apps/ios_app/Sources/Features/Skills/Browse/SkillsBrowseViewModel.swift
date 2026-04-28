@@ -23,8 +23,6 @@ struct SkillRoadmapItem: Identifiable, Sendable {
     let nextPlannedSession: PlannedSession?
     let state: SkillsBrowseState
     let academyPhase: Int
-    let prerequisiteSummary: String?
-    let nextActionLabel: String?
     let personalRecord: PRValue?
     let practiceCount: Int?
 
@@ -119,6 +117,17 @@ final class SkillsBrowseViewModel {
             .sorted(by: compareRoadmapItems)
     }
 
+    var orderedVisibleItems: [SkillRoadmapItem] {
+        let activeItems = visibleItems
+            .filter { $0.state == .active }
+            .sorted(by: compareActiveItems)
+        let roadmapItems = visibleItems
+            .filter { $0.state != .active }
+            .sorted(by: compareRoadmapItems)
+
+        return activeItems + roadmapItems
+    }
+
     func isCategorySelected(_ category: SkillCategory?) -> Bool {
         selectedCategory == category
     }
@@ -177,8 +186,6 @@ final class SkillsBrowseViewModel {
                 nextPlannedSession: nextSessionsBySkillId[skill.id],
                 state: state,
                 academyPhase: index + 1,
-                prerequisiteSummary: prerequisiteSummary(for: skill, state: state, orderedCatalog: orderedCatalog, index: index),
-                nextActionLabel: nextActionLabel(for: skill, state: state, nextSession: nextSessionsBySkillId[skill.id], userSkill: userSkill),
                 personalRecord: activeMetricsBySkillId[skill.id]?.personalRecord,
                 practiceCount: activeMetricsBySkillId[skill.id]?.practiceCount
             )
@@ -242,62 +249,6 @@ final class SkillsBrowseViewModel {
         }
 
         return .future
-    }
-
-    private func prerequisiteSummary(
-        for skill: Skill,
-        state: SkillsBrowseState,
-        orderedCatalog: [Skill],
-        index: Int
-    ) -> String? {
-        switch state {
-        case .active:
-            return String(localized: "browse_active_prerequisite")
-        case .available:
-            return String(localized: "browse_available_prerequisite")
-        case .locked:
-            guard index > 0 else { return nil }
-            return String(
-                format: String(localized: "browse_locked_prerequisite_format"),
-                orderedCatalog[index - 1].name
-            )
-        case .future:
-            guard index > 0 else { return nil }
-            return String(
-                format: String(localized: "browse_future_prerequisite_format"),
-                orderedCatalog[index - 1].name
-            )
-        }
-    }
-
-    private func nextActionLabel(
-        for skill: Skill,
-        state: SkillsBrowseState,
-        nextSession: PlannedSession?,
-        userSkill: UserSkill?
-    ) -> String? {
-        switch state {
-        case .active:
-            if let nextSession {
-                return String(
-                    format: String(localized: "browse_next_session_format"),
-                    nextSession.prescription.displayString
-                )
-            }
-            if let userSkill {
-                return String(
-                    format: String(localized: "browse_frequency_format"),
-                    userSkill.weeklyFrequency
-                )
-            }
-            return String(localized: "browse_action_continue")
-        case .available:
-            return String(localized: "browse_action_available")
-        case .locked:
-            return String(localized: "browse_action_locked")
-        case .future:
-            return String(localized: "browse_action_future")
-        }
     }
 
     private func matchesFilters(item: SkillRoadmapItem) -> Bool {

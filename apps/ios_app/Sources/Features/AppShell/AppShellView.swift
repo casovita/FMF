@@ -25,9 +25,9 @@ struct AppShellView: View {
                 .tag(AppTab.progress)
 
                 NavigationStack {
-                    ProfileView()
+                    SettingsView()
                 }
-                .tag(AppTab.profile)
+                .tag(AppTab.settings)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
 

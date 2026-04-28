@@ -61,11 +61,6 @@ struct SkillsBrowseView: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text(String(localized: "browse_subtitle"))
-                .font(FMFTypography.bodyLarge)
-                .foregroundStyle(FMFColors.neutral500)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
             if vm.shouldShowDiscoveryControls {
                 discoveryControls(vm: vm)
             }
@@ -88,47 +83,10 @@ struct SkillsBrowseView: View {
             } else if vm.visibleItems.isEmpty {
                 filteredEmptyState
             } else {
-                if !vm.continueTrainingItems.isEmpty {
-                    SkillsBrowseSection(
-                        title: String(localized: "browse_continue_title"),
-                        subtitle: String(localized: "browse_continue_subtitle")
-                    ) {
-                        VStack(spacing: FMFSpacing.md) {
-                            ForEach(Array(vm.continueTrainingItems.prefix(3))) { item in
-                                ActiveSkillCard(item: item) {
-                                    selectedSkill = item.skill
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if !vm.unlockNextItems.isEmpty {
-                    SkillsBrowseSection(
-                        title: String(localized: "browse_unlock_title"),
-                        subtitle: String(localized: "browse_unlock_subtitle")
-                    ) {
-                        VStack(spacing: FMFSpacing.md) {
-                            ForEach(vm.unlockNextItems) { item in
-                                RoadmapSkillRow(item: item, style: .recommended) {
-                                    selectedSkill = item.skill
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if !vm.futureCurriculumItems.isEmpty {
-                    SkillsBrowseSection(
-                        title: String(localized: "browse_future_title"),
-                        subtitle: String(localized: "browse_future_subtitle")
-                    ) {
-                        VStack(spacing: FMFSpacing.md) {
-                            ForEach(vm.futureCurriculumItems) { item in
-                                RoadmapSkillRow(item: item, style: .muted) {
-                                    selectedSkill = item.skill
-                                }
-                            }
+                VStack(spacing: FMFSpacing.md) {
+                    ForEach(vm.orderedVisibleItems) { item in
+                        MinimalSkillRow(item: item) {
+                            selectedSkill = item.skill
                         }
                     }
                 }
@@ -217,33 +175,6 @@ struct SkillsBrowseView: View {
     }
 }
 
-private struct SkillsBrowseSection<Content: View>: View {
-    let title: String
-    let subtitle: String
-    let content: Content
-
-    init(title: String, subtitle: String, @ViewBuilder content: () -> Content) {
-        self.title = title
-        self.subtitle = subtitle
-        self.content = content()
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: FMFSpacing.md) {
-            VStack(alignment: .leading, spacing: FMFSpacing.xs) {
-                Text(title)
-                    .font(FMFTypography.titleLarge)
-                    .foregroundStyle(.white)
-                Text(subtitle)
-                    .font(FMFTypography.bodySmall)
-                    .foregroundStyle(FMFColors.neutral500)
-            }
-
-            content
-        }
-    }
-}
-
 private struct BrowseFilterChip: View {
     let title: String
     let isSelected: Bool
@@ -270,7 +201,7 @@ private struct BrowseFilterChip: View {
     }
 }
 
-private struct ActiveSkillCard: View {
+private struct MinimalSkillRow: View {
     private static let progressMilestone = 20.0
 
     let item: SkillRoadmapItem
@@ -291,7 +222,7 @@ private struct ActiveSkillCard: View {
             HStack(spacing: FMFSpacing.md) {
                 SkillRoadmapTile(skill: item.skill, size: 70, isMuted: false)
 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: FMFSpacing.xs) {
                     HStack(spacing: FMFSpacing.sm) {
                         Text(item.skill.name)
                             .font(FMFTypography.titleLarge)
@@ -300,24 +231,9 @@ private struct ActiveSkillCard: View {
                             .multilineTextAlignment(.leading)
 
                         Spacer(minLength: 0)
-
-                        SkillStateChip(state: item.state)
                     }
 
-                    if let personalRecord = item.personalRecord {
-                        Text(
-                            String(
-                                format: String(localized: "browse_active_pr_format"),
-                                String(localized: "skillDetailPR"),
-                                personalRecord.displayString
-                            )
-                        )
-                            .font(FMFTypography.bodySmall)
-                            .foregroundStyle(FMFColors.neutral300)
-                            .lineLimit(1)
-                    }
-
-                    if let progressValue, let practiceCount {
+                    if item.state == .active, let progressValue, let practiceCount {
                         VStack(alignment: .leading, spacing: FMFSpacing.xs) {
                             HStack(spacing: FMFSpacing.xs) {
                                 Text(
@@ -355,115 +271,48 @@ private struct ActiveSkillCard: View {
             .padding(.vertical, 14)
             .background {
                 RoundedRectangle(cornerRadius: FMFRadius.lg)
-                    .fill(LinearGradient(gradient: FMFGradients.cardSurface, startPoint: .topLeading, endPoint: .bottomTrailing))
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: FMFRadius.lg)
-                    .strokeBorder(categoryColor(for: item.skill.category).opacity(0.24), lineWidth: 1)
-            }
-            .clipShape(RoundedRectangle(cornerRadius: FMFRadius.lg))
-            .shadow(color: categoryColor(for: item.skill.category).opacity(0.10), radius: 12, x: 0, y: 6)
-        }
-        .buttonStyle(.plain)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(item.skill.name), \(accessibilityStateLabel(for: item.state))")
-    }
-}
-
-private struct RoadmapSkillRow: View {
-    enum Style {
-        case recommended
-        case muted
-    }
-
-    let item: SkillRoadmapItem
-    let style: Style
-    let onTap: () -> Void
-
-    var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: FMFSpacing.md) {
-                SkillRoadmapTile(skill: item.skill, size: style == .recommended ? 56 : 64, isMuted: style == .muted)
-
-                VStack(alignment: .leading, spacing: FMFSpacing.xs) {
-                    HStack(spacing: FMFSpacing.sm) {
-                        Text(item.skill.name)
-                            .font(FMFTypography.titleMedium)
-                            .foregroundStyle(.white)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                            .multilineTextAlignment(.leading)
-
-                        Spacer(minLength: 0)
-
-                        if style == .recommended {
-                            SkillStateChip(state: item.state)
-                        }
-                    }
-
-                    if style == .recommended {
-                        Text(item.nextActionLabel ?? item.prerequisiteSummary ?? item.skill.description)
-                            .font(FMFTypography.bodySmall)
-                            .foregroundStyle(FMFColors.brandPrimaryLight)
-                            .lineLimit(2)
-                            .multilineTextAlignment(.leading)
-                    } else {
-                        Text(item.skill.description)
-                            .font(FMFTypography.bodySmall)
-                            .foregroundStyle(FMFColors.neutral500)
-                            .multilineTextAlignment(.leading)
-
-                        if let prerequisiteSummary = item.prerequisiteSummary {
-                            Text(prerequisiteSummary)
-                                .font(FMFTypography.labelSmall)
-                                .foregroundStyle(stateColor(for: item.state))
-                        }
-
-                        if let nextActionLabel = item.nextActionLabel {
-                            Text(nextActionLabel)
-                                .font(FMFTypography.bodySmall)
-                                .foregroundStyle(FMFColors.neutral300)
-                        }
-                    }
-                }
-
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(FMFColors.neutral500)
-            }
-            .padding(.horizontal, FMFSpacing.md)
-            .padding(.vertical, style == .recommended ? 12 : FMFSpacing.md)
-            .background {
-                RoundedRectangle(cornerRadius: FMFRadius.lg)
                     .fill(backgroundFill)
             }
-            .clipShape(RoundedRectangle(cornerRadius: FMFRadius.lg))
             .overlay {
                 RoundedRectangle(cornerRadius: FMFRadius.lg)
                     .strokeBorder(borderColor, lineWidth: 1)
             }
+            .clipShape(RoundedRectangle(cornerRadius: FMFRadius.lg))
+            .shadow(color: shadowColor, radius: 12, x: 0, y: 6)
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(item.skill.name), \(accessibilityStateLabel(for: item.state))")
+        .accessibilityLabel(item.skill.name)
     }
 
     private var backgroundFill: AnyShapeStyle {
-        switch style {
-        case .recommended:
-            return AnyShapeStyle(FMFColors.surfaceMid.opacity(0.9))
-        case .muted:
-            return AnyShapeStyle(FMFColors.surfaceMid.opacity(0.86))
+        if item.state == .active {
+            return AnyShapeStyle(
+                LinearGradient(
+                    gradient: FMFGradients.cardSurface,
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
         }
+
+        return AnyShapeStyle(FMFColors.surfaceMid.opacity(0.9))
     }
 
     private var borderColor: Color {
-        switch style {
-        case .recommended:
-            return .white.opacity(0.06)
-        case .muted:
-            return .white.opacity(0.06)
+        if item.state == .active {
+            return categoryColor(for: item.skill.category).opacity(0.24)
         }
+
+        return .white.opacity(0.06)
+    }
+
+    private var shadowColor: Color {
+        if item.state == .active {
+            return categoryColor(for: item.skill.category).opacity(0.10)
+        }
+
+        return .black.opacity(0.14)
     }
 }
 
@@ -511,46 +360,6 @@ private struct SkillRoadmapTile: View {
         }
         .frame(width: size, height: size)
         .shadow(color: categoryColor(for: skill.category).opacity(isMuted ? 0.08 : 0.18), radius: size * 0.2, x: 0, y: size * 0.08)
-    }
-}
-
-private struct SkillStateChip: View {
-    let state: SkillsBrowseState
-
-    var body: some View {
-        Text(stateTitle(for: state))
-            .font(FMFTypography.labelSmall)
-            .foregroundStyle(stateColor(for: state))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(stateColor(for: state).opacity(0.14))
-            .clipShape(Capsule())
-    }
-}
-
-private func stateTitle(for state: SkillsBrowseState) -> String {
-    switch state {
-    case .active:
-        return String(localized: "browse_state_active")
-    case .available:
-        return String(localized: "browse_state_available")
-    case .locked:
-        return String(localized: "browse_state_locked")
-    case .future:
-        return String(localized: "browse_state_future")
-    }
-}
-
-private func accessibilityStateLabel(for state: SkillsBrowseState) -> String {
-    switch state {
-    case .active:
-        return String(localized: "browse_accessibility_active")
-    case .available:
-        return String(localized: "browse_accessibility_available")
-    case .locked:
-        return String(localized: "browse_accessibility_locked")
-    case .future:
-        return String(localized: "browse_accessibility_future")
     }
 }
 

@@ -4,14 +4,14 @@ enum AppTab: Int, CaseIterable {
     case home = 0
     case skills = 1
     case progress = 2
-    case profile = 3
+    case settings = 3
 
     var label: String {
         switch self {
         case .home: return "Home"
         case .skills: return "Skills"
         case .progress: return "Progress"
-        case .profile: return "Profile"
+        case .settings: return "Settings"
         }
     }
 
@@ -20,7 +20,7 @@ enum AppTab: Int, CaseIterable {
         case .home: return "house"
         case .skills: return "figure.strengthtraining.traditional"
         case .progress: return "chart.bar"
-        case .profile: return "person"
+        case .settings: return "gearshape"
         }
     }
 
@@ -29,7 +29,7 @@ enum AppTab: Int, CaseIterable {
         case .home: return "house.fill"
         case .skills: return "figure.strengthtraining.traditional"
         case .progress: return "chart.bar.fill"
-        case .profile: return "person.fill"
+        case .settings: return "gearshape.fill"
         }
     }
 }
