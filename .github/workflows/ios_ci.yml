@@ -1,0 +1,53 @@
+name: iOS CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select available simulator
+        id: simulator
+        run: |
+          SIMULATOR_NAME="$(
+            xcrun simctl list devices available | \
+            grep -E "iPhone .* Pro" | \
+            head -n 1 | \
+            sed -E 's/^[[:space:]]*([^()]+) \(.+$/\1/' | \
+            xargs
+          )"
+
+          if [ -z "$SIMULATOR_NAME" ]; then
+            echo "No available iPhone Pro simulator found." >&2
+            xcrun simctl list devices available
+            exit 1
+          fi
+
+          echo "name=$SIMULATOR_NAME" >> "$GITHUB_OUTPUT"
+          echo "Using simulator: $SIMULATOR_NAME"
+
+      - name: Build
+        run: |
+          xcodebuild \
+            -project apps/ios_app/FMF.xcodeproj \
+            -scheme FMF-Dev \
+            -destination "platform=iOS Simulator,name=${{ steps.simulator.outputs.name }}" \
+            build
+
+      - name: Test
+        run: |
+          xcodebuild \
+            -project apps/ios_app/FMF.xcodeproj \
+            -scheme FMF-Dev \
+            -destination "platform=iOS Simulator,name=${{ steps.simulator.outputs.name }}" \
+            test
