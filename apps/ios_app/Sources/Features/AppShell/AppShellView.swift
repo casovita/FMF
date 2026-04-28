@@ -5,6 +5,9 @@ struct AppShellView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
+            FMFColors.background
+                .ignoresSafeArea()
+
             TabView(selection: $selectedTab) {
                 NavigationStack {
                     HomeView()
@@ -33,6 +36,7 @@ struct AppShellView: View {
                 .padding(.bottom, 12)
                 .ignoresSafeArea(edges: .bottom)
         }
+        .toolbarBackground(.hidden, for: .navigationBar)
         .ignoresSafeArea(edges: .bottom)
     }
 }

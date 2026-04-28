@@ -1,30 +1,36 @@
 import SwiftUI
 
 enum FMFColors {
+    // Backgrounds
+    static let background     = Color(hex: 0x0A0A0A)
+    static let surfaceLow     = Color(hex: 0x121212)
+    static let surfaceMid     = Color(hex: 0x1A1A1A)
+    static let surfaceHigh    = Color(hex: 0x2A2A2A)
+    static let surfaceOverlay = Color(hex: 0x3F3F3F)
+
     // Brand
-    static let brandPrimary = Color(hex: 0x1A1A2E)
-    static let brandAccent = Color(hex: 0x2563EB)
-    static let accentBlueLight = Color(hex: 0x3B82F6)
-    static let darkSurface = Color(hex: 0x1E2A3B)
-    static let brandSurface = Color(hex: 0xF8F8FC)
+    static let brandPrimary      = Color(hex: 0xFF8068)
+    static let brandPrimaryDark  = Color(hex: 0xD9512A)
+    static let brandPrimaryLight = Color(hex: 0xFF9D8E)
 
     // Semantic
-    static let success = Color(hex: 0x22C55E)
-    static let warning = Color(hex: 0xF59E0B)
-    static let error = Color(hex: 0xEF4444)
+    static let success = Color(hex: 0x52D652)
+    static let warning = Color(hex: 0xFFB800)
+    static let error   = Color(hex: 0xFF6B6B)
 
     // Neutral scale
-    static let neutral900 = Color(hex: 0x111827)
-    static let neutral700 = Color(hex: 0x374151)
+    static let neutral900 = Color(hex: 0x1A1A1A)
+    static let neutral700 = Color(hex: 0x3F3F3F)
     static let neutral500 = Color(hex: 0x6B7280)
     static let neutral300 = Color(hex: 0xD1D5DB)
     static let neutral100 = Color(hex: 0xF3F4F6)
-    static let neutral50 = Color(hex: 0xFAFAFA)
+    static let neutral50  = Color(hex: 0xFAFAFA)
 
-    // Skill category tints
-    static let skillBalance = Color(hex: 0x6366F1)
-    static let skillStrength = Color(hex: 0xEF4444)
-    static let skillBodyweight = Color(hex: 0x00D4AA)
+    // Skill category accents
+    static let skillBalance    = Color(hex: 0x4D7CFF)
+    static let skillStrength   = Color(hex: 0xFF8068)
+    static let skillBodyweight = Color(hex: 0x52D652)
+
 }
 
 extension Color {

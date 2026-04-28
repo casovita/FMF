@@ -51,3 +51,16 @@ extension EnvironmentValues {
         set { self[TrainingProgramRepositoryKey.self] = newValue }
     }
 }
+
+// MARK: - WorkoutSoundPlaying
+
+private struct WorkoutSoundPlayerKey: EnvironmentKey {
+    static let defaultValue: any WorkoutSoundPlaying = NoOpWorkoutSoundPlayer()
+}
+
+extension EnvironmentValues {
+    var workoutSoundPlayer: any WorkoutSoundPlaying {
+        get { self[WorkoutSoundPlayerKey.self] }
+        set { self[WorkoutSoundPlayerKey.self] = newValue }
+    }
+}

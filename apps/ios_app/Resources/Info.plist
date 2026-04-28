@@ -20,6 +20,8 @@
 	<true/>
 	<key>UILaunchScreen</key>
 	<dict>
+		<key>UIImageName</key>
+		<string>SplashPoster</string>
 		<key>UIColorName</key>
 		<string>brandPrimary</string>
 	</dict>
@@ -34,6 +36,10 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>FMF uses your camera to detect handstand pose and time your session.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>FMF uses your microphone so you can control a session with voice commands.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>FMF recognizes “start” and “stop” so you can run hands-free sessions.</string>
 	<key>APP_FLAVOR</key>
 	<string>$(APP_FLAVOR)</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>

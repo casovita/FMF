@@ -1,13 +1,38 @@
 import SwiftUI
 
 struct RootView: View {
-    @AppStorage("didCompleteOnboarding") private var didCompleteOnboarding = false
+    @State private var showsSplash = true
 
     var body: some View {
-        if didCompleteOnboarding {
+        ZStack {
             AppShellView()
-        } else {
-            OnboardingFlowView()
+
+            if showsSplash {
+                SplashScreenView()
+                    .transition(.opacity)
+                    .zIndex(1)
+            }
+        }
+        .task {
+            guard showsSplash else { return }
+            try? await Task.sleep(for: .milliseconds(1400))
+            withAnimation(.easeOut(duration: 0.25)) {
+                showsSplash = false
+            }
+        }
+    }
+}
+
+private struct SplashScreenView: View {
+    var body: some View {
+        ZStack {
+            Color("brandPrimary")
+                .ignoresSafeArea()
+
+            Image("SplashPoster")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
         }
     }
 }

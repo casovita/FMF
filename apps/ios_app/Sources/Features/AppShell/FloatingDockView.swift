@@ -48,12 +48,12 @@ struct FloatingDockView: View {
                         if selected {
                             ZStack {
                                 Circle()
-                                    .fill(FMFColors.brandAccent.opacity(0.2))
+                                    .fill(FMFColors.brandPrimary.opacity(0.2))
                                     .frame(width: 32, height: 32)
-                                    .shadow(color: FMFColors.brandAccent.opacity(0.45), radius: 7)
+                                    .shadow(color: FMFColors.brandPrimary.opacity(0.45), radius: 7)
                                 Image(systemName: tab.selectedIcon)
                                     .font(.system(size: 16, weight: .medium))
-                                    .foregroundStyle(FMFColors.accentBlueLight)
+                                    .foregroundStyle(FMFColors.brandPrimary)
                             }
                             .frame(width: 32, height: 32)
                         } else {
@@ -66,7 +66,7 @@ struct FloatingDockView: View {
                             .font(.system(size: 10, weight: selected ? .semibold : .regular))
                             .foregroundStyle(
                                 selected
-                                    ? FMFColors.accentBlueLight
+                                    ? FMFColors.brandPrimary
                                     : FMFColors.neutral500.opacity(0.55)
                             )
                     }
@@ -79,13 +79,13 @@ struct FloatingDockView: View {
         .padding(.horizontal, 20)
         .background {
             RoundedRectangle(cornerRadius: 36)
-                .fill(Color(hex: 0x131D30).opacity(0.92))
+                .fill(FMFColors.surfaceLow.opacity(0.92))
                 .overlay {
                     RoundedRectangle(cornerRadius: 36)
                         .strokeBorder(.white.opacity(0.1), lineWidth: 1)
                 }
                 .shadow(color: .black.opacity(0.4), radius: 28, x: 0, y: -4)
-                .shadow(color: FMFColors.brandAccent.opacity(0.1), radius: 24)
+                .shadow(color: FMFColors.brandPrimary.opacity(0.08), radius: 24)
         }
         .clipShape(RoundedRectangle(cornerRadius: 36))
     }

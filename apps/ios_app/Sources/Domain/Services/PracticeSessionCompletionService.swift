@@ -72,8 +72,11 @@ struct PracticeSessionCompletionService: PracticeSessionCompleting {
 
         switch prescriptionType {
         case .duration:
-            return max(0, session.durationMinutes * 60)
+            return max(0, session.targetValuePerSet > 0 ? session.targetValuePerSet : session.durationMinutes * 60)
         case .reps:
+            if session.targetValuePerSet > 0 {
+                return max(0, session.targetValuePerSet * session.setsCompleted)
+            }
             return max(0, session.setsCompleted)
         }
     }

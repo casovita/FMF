@@ -27,6 +27,8 @@ targets:
         buildPhase: resources
       - path: Resources/Localizable.strings
         buildPhase: resources
+      - path: Resources/Sounds
+        buildPhase: resources
     settings:
       base:
         SWIFT_VERSION: "6.0"

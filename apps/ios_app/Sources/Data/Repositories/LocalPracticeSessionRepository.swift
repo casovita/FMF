@@ -15,6 +15,12 @@ final class LocalPracticeSessionRepository: PracticeSessionRepository {
         }
     }
 
+    func deleteSession(id: String) async throws {
+        try await db.dbWriter.write { db in
+            _ = try PracticeSessionRecord.deleteOne(db, key: id)
+        }
+    }
+
     func getSessionsForSkill(_ skillId: String) async throws -> [PracticeSession] {
         try await db.dbWriter.read { db in
             let records = try PracticeSessionRecord

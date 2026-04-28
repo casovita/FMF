@@ -11,6 +11,9 @@ struct PracticeSessionRecord: FetchableRecord, PersistableRecord, TableRecord {
     var notes: String?
     var completedAt: Date?
     var setsCompleted: Int
+    var targetValuePerSet: Int
+    var restSeconds: Int
+    var durationSetValuesData: Data?
     var plannedSessionId: String?
     var isPersonalRecord: Bool
     var sessionScore: Int
@@ -23,6 +26,9 @@ struct PracticeSessionRecord: FetchableRecord, PersistableRecord, TableRecord {
         notes = session.notes
         completedAt = session.completedAt
         setsCompleted = session.setsCompleted
+        targetValuePerSet = session.targetValuePerSet
+        restSeconds = session.restSeconds
+        durationSetValuesData = try? JSONEncoder().encode(session.durationSetValues)
         plannedSessionId = session.plannedSessionId
         isPersonalRecord = session.isPersonalRecord
         sessionScore = session.sessionScore
@@ -39,6 +45,9 @@ struct PracticeSessionRecord: FetchableRecord, PersistableRecord, TableRecord {
             completedAt = Date(timeIntervalSince1970: completedAtTimestamp)
         }
         setsCompleted = row["setsCompleted"] ?? 0
+        targetValuePerSet = row["targetValuePerSet"] ?? 0
+        restSeconds = row["restSeconds"] ?? 0
+        durationSetValuesData = row["durationSetValuesData"]
         plannedSessionId = row["plannedSessionId"]
         isPersonalRecord = row["isPersonalRecord"] ?? false
         sessionScore = row["sessionScore"] ?? 0
@@ -52,13 +61,17 @@ struct PracticeSessionRecord: FetchableRecord, PersistableRecord, TableRecord {
         container["notes"] = notes
         container["completedAt"] = completedAt?.timeIntervalSince1970
         container["setsCompleted"] = setsCompleted
+        container["targetValuePerSet"] = targetValuePerSet
+        container["restSeconds"] = restSeconds
+        container["durationSetValuesData"] = durationSetValuesData
         container["plannedSessionId"] = plannedSessionId
         container["isPersonalRecord"] = isPersonalRecord
         container["sessionScore"] = sessionScore
     }
 
     var asDomain: PracticeSession {
-        PracticeSession(
+        let durationSetValues = (try? durationSetValuesData.flatMap { try JSONDecoder().decode([Int].self, from: $0) }) ?? []
+        return PracticeSession(
             id: id,
             skillId: skillId,
             date: date,
@@ -66,6 +79,9 @@ struct PracticeSessionRecord: FetchableRecord, PersistableRecord, TableRecord {
             notes: notes,
             completedAt: completedAt,
             setsCompleted: setsCompleted,
+            targetValuePerSet: targetValuePerSet,
+            restSeconds: restSeconds,
+            durationSetValues: durationSetValues,
             plannedSessionId: plannedSessionId,
             isPersonalRecord: isPersonalRecord,
             sessionScore: sessionScore

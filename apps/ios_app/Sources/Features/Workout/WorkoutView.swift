@@ -4,17 +4,30 @@ import AVFoundation
 struct WorkoutView: View {
     let skillId: String
     let plannedSession: PlannedSession?
+    let sessionDraft: PracticeSessionDraft?
+    let initialMode: WorkoutMode?
+    let onSessionFinished: (() -> Void)?
 
     @Environment(\.practiceSessionRepository) private var repo
     @Environment(\.skillRepository) private var skillRepo
     @Environment(\.trainingProgramRepository) private var trainingProgramRepo
+    @Environment(\.workoutSoundPlayer) private var workoutSoundPlayer
     @Environment(\.dismiss) private var dismiss
     @State private var vm: WorkoutViewModel?
     @State private var skill: Skill?
 
-    init(skillId: String, plannedSession: PlannedSession? = nil) {
+    init(
+        skillId: String,
+        plannedSession: PlannedSession? = nil,
+        sessionDraft: PracticeSessionDraft? = nil,
+        initialMode: WorkoutMode? = nil,
+        onSessionFinished: (() -> Void)? = nil
+    ) {
         self.skillId = skillId
         self.plannedSession = plannedSession
+        self.sessionDraft = sessionDraft
+        self.initialMode = initialMode
+        self.onSessionFinished = onSessionFinished
     }
 
     var body: some View {
@@ -26,8 +39,11 @@ struct WorkoutView: View {
                             vm.cleanup()
                             _ = total
                             dismiss()
+                            onSessionFinished?()
                         }
                     }
+            } else {
+                ProgressView().tint(FMFColors.brandPrimary)
             }
         }
         .task {
@@ -43,8 +59,13 @@ struct WorkoutView: View {
                 prescriptionType: loadedSkill?.prescriptionType ?? .duration,
                 completionService: completionService,
                 plannedSession: plannedSession,
-                supportsSmartTracking: loadedSkill.map(supportsSmartTracking(for:)) ?? false
+                supportsSmartTracking: loadedSkill.map(supportsSmartTracking(for:)) ?? false,
+                sessionDraft: sessionDraft,
+                soundPlayer: workoutSoundPlayer
             )
+            if let initialMode {
+                await viewModel.selectMode(initialMode)
+            }
             vm = viewModel
         }
         .onDisappear {
@@ -89,7 +110,7 @@ private struct ModeSelectionView: View {
     var body: some View {
         GeometryReader { proxy in
             ZStack {
-                Color(hex: 0x0D1628).ignoresSafeArea()
+                FMFColors.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     HStack {
@@ -134,12 +155,22 @@ private struct ModeSelectionView: View {
 
                     if showsManualTracking {
                         ModeCard(
-                            accessibilityIdentifier: "workout.mode.manual",
+                            accessibilityIdentifier: "workout.mode.timer",
                             systemImage: "hand.tap",
-                            title: String(localized: "workout_mode_manual_title"),
-                            subtitle: String(localized: "workout_mode_manual_subtitle"),
-                            color: FMFColors.brandAccent
-                        ) { onSelect(.manual) }
+                            title: String(localized: "workout_mode_timer_title"),
+                            subtitle: String(localized: "workout_mode_timer_subtitle"),
+                            color: FMFColors.brandPrimary
+                        ) { onSelect(.timer) }
+
+                        Spacer().frame(height: FMFSpacing.md)
+
+                        ModeCard(
+                            accessibilityIdentifier: "workout.mode.sound",
+                            systemImage: "waveform.and.mic",
+                            title: String(localized: "workout_mode_sound_title"),
+                            subtitle: String(localized: "workout_mode_sound_subtitle"),
+                            color: FMFColors.skillStrength
+                        ) { onSelect(.sound) }
                     } else {
                         Text(String(localized: "workout_mode_camera_only"))
                             .font(FMFTypography.bodySmall)
@@ -217,11 +248,21 @@ private struct WorkoutCameraView: View {
     var body: some View {
         ZStack {
             // Camera layer
-            if let session = vm.captureSession {
+            if let session = vm.captureSession, vm.modeUsesCamera {
                 CameraPreviewView(session: session)
                     .ignoresSafeArea()
+            } else if vm.modeUsesGuidedTimer {
+                GuidedTimerPlaceholder(vm: vm)
+            } else if vm.modeUsesVoiceCommands {
+                VoiceCommandPlaceholder(vm: vm)
             } else {
                 ScanningPlaceholder(vm: vm)
+            }
+
+            if vm.modeUsesCamera {
+                CameraPositionGuide()
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
             }
 
             // Top gradient
@@ -267,6 +308,102 @@ private struct WorkoutCameraView: View {
     }
 }
 
+private struct CameraPositionGuide: View {
+    var body: some View {
+        GeometryReader { proxy in
+            let width = proxy.size.width
+            let height = proxy.size.height
+            let guideWidth = min(width * 0.62, 300)
+            let guideHeight = min(height * 0.62, 520)
+            let guideRect = CGRect(
+                x: (width - guideWidth) / 2,
+                y: max(100, (height - guideHeight) / 2 - 24),
+                width: guideWidth,
+                height: guideHeight
+            )
+
+            ZStack {
+                RoundedRectangle(cornerRadius: 34)
+                    .strokeBorder(
+                        style: StrokeStyle(lineWidth: 2, dash: [12, 10])
+                    )
+                    .foregroundStyle(.white.opacity(0.45))
+                    .frame(width: guideRect.width, height: guideRect.height)
+                    .position(x: guideRect.midX, y: guideRect.midY)
+
+                Path { path in
+                    path.move(to: CGPoint(x: guideRect.midX, y: guideRect.minY + 18))
+                    path.addLine(to: CGPoint(x: guideRect.midX, y: guideRect.maxY - 18))
+                }
+                .stroke(.white.opacity(0.24), style: StrokeStyle(lineWidth: 1, dash: [6, 8]))
+
+                Group {
+                    guideMarker(
+                        systemImage: "person.crop.circle",
+                        label: String(localized: "workout_camera_guide_head")
+                    )
+                    .position(x: guideRect.midX, y: guideRect.minY + 42)
+
+                    guideMarker(
+                        systemImage: "arrow.up.and.down",
+                        label: String(localized: "workout_camera_guide_midline")
+                    )
+                    .position(x: guideRect.midX, y: guideRect.midY)
+
+                    guideMarker(
+                        systemImage: "figure.walk",
+                        label: String(localized: "workout_camera_guide_feet")
+                    )
+                    .position(x: guideRect.midX, y: guideRect.maxY - 42)
+                }
+
+                VStack(spacing: FMFSpacing.xs) {
+                    Text(String(localized: "workout_camera_guide_title"))
+                        .font(FMFTypography.labelMedium)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.white.opacity(0.92))
+
+                    Text(String(localized: "workout_camera_guide_subtitle"))
+                        .font(FMFTypography.bodySmall)
+                        .foregroundStyle(.white.opacity(0.62))
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.horizontal, FMFSpacing.md)
+                .padding(.vertical, FMFSpacing.sm)
+                .background(.black.opacity(0.28))
+                .clipShape(RoundedRectangle(cornerRadius: FMFRadius.md))
+                .overlay {
+                    RoundedRectangle(cornerRadius: FMFRadius.md)
+                        .strokeBorder(.white.opacity(0.12), lineWidth: 1)
+                }
+                .position(x: guideRect.midX, y: guideRect.maxY + 54)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .accessibilityHidden(true)
+    }
+
+    @ViewBuilder
+    private func guideMarker(systemImage: String, label: String) -> some View {
+        HStack(spacing: FMFSpacing.xs) {
+            Image(systemName: systemImage)
+                .font(.system(size: 12, weight: .semibold))
+            Text(label)
+                .font(FMFTypography.labelSmall)
+                .fontWeight(.semibold)
+        }
+        .foregroundStyle(.white.opacity(0.9))
+        .padding(.horizontal, FMFSpacing.sm)
+        .padding(.vertical, 6)
+        .background(.black.opacity(0.32))
+        .clipShape(Capsule())
+        .overlay {
+            Capsule()
+                .strokeBorder(.white.opacity(0.14), lineWidth: 1)
+        }
+    }
+}
+
 private struct SafeAreaOverlay: View {
     let vm: WorkoutViewModel
 
@@ -274,7 +411,7 @@ private struct SafeAreaOverlay: View {
         VStack(spacing: 0) {
             Spacer()
 
-            StatusBadge(state: vm.state)
+            StatusBadge(vm: vm)
             Spacer().frame(height: FMFSpacing.md)
             WorkoutMetricDisplay(vm: vm)
             Spacer().frame(height: FMFSpacing.xl)
@@ -288,13 +425,32 @@ private struct SafeAreaOverlay: View {
 // MARK: - Status badge
 
 private struct StatusBadge: View {
-    let state: WorkoutState
+    let vm: WorkoutViewModel
 
     private var labelAndColor: (String, Color) {
+        let state = vm.state
         switch state {
         case .modeSelection:                 return ("", FMFColors.neutral300)
-        case .idle:                          return (String(localized: "workout_status_scanning"), FMFColors.neutral300)
-        case .active:                        return (String(localized: "workout_status_active"), FMFColors.skillBalance)
+        case .idle:                          return (vm.idleStatusLabel, FMFColors.neutral300)
+        case .countdown(_, let phase):
+            switch phase {
+            case .initialCountdown:
+                return (String(localized: "workout_status_get_ready"), FMFColors.warning)
+            case .setCountdown(let setNumber):
+                let format = String(localized: "workout_status_set_ready_format")
+                return (String(format: format, setNumber), FMFColors.warning)
+            case .work(let setNumber):
+                let format = String(localized: "workout_status_set_live_format")
+                return (String(format: format, setNumber), FMFColors.skillBalance)
+            case .rest(let nextSetNumber):
+                let format = String(localized: "workout_status_rest_format")
+                return (String(format: format, nextSetNumber), FMFColors.brandPrimary)
+            }
+        case .active:
+            return (String(localized: "workout_status_active"), FMFColors.skillBalance)
+        case .resting(_, let nextSetNumber):
+            let format = String(localized: "workout_status_rest_format")
+            return (String(format: format, nextSetNumber), FMFColors.brandPrimary)
         case .paused:                        return (String(localized: "workout_status_paused"), FMFColors.warning)
         case .complete:                      return (String(localized: "workout_status_done"), FMFColors.success)
         case .error(let msg):                return ("\(String(localized: "workout_status_error")) \(msg)", FMFColors.error)
@@ -303,7 +459,7 @@ private struct StatusBadge: View {
 
     var body: some View {
         let (label, color) = labelAndColor
-        let isActive = if case .active = state { true } else { false }
+        let isActive = if case .active = vm.state { true } else { false }
 
         Text(label)
             .font(FMFTypography.labelMedium)
@@ -337,7 +493,7 @@ private struct WorkoutMetricDisplay: View {
             }
             .accessibilityIdentifier("workout.camera.metric")
         } else {
-            let seconds = vm.state.elapsedSeconds
+            let seconds = vm.displaySeconds
             let mm = String(format: "%02d", seconds / 60)
             let ss = String(format: "%02d", seconds % 60)
 
@@ -362,9 +518,9 @@ private struct ActionButtons: View {
             VStack(spacing: FMFSpacing.sm) {
                 if vm.shouldShowManualStart {
                     GlassPillButton(
-                        label: String(localized: "workout_start_manual"),
+                        label: String(localized: "workout_start_timer"),
                         systemImage: "play.fill",
-                        color: FMFColors.brandAccent
+                        color: FMFColors.brandPrimary
                     ) { vm.manualStart() }
                 }
 
@@ -373,7 +529,7 @@ private struct ActionButtons: View {
                     .foregroundStyle(.white.opacity(0.4))
             }
 
-        case .active, .paused:
+        case .countdown, .resting, .active, .paused:
             GlassPillButton(
                 label: String(localized: "workout_stop_save"),
                 systemImage: "stop.fill",
@@ -444,7 +600,7 @@ private struct ScanningPlaceholder: View {
 
     var body: some View {
         ZStack {
-            Color(hex: 0x0D1628).ignoresSafeArea()
+            FMFColors.background.ignoresSafeArea()
             VStack(spacing: FMFSpacing.md) {
                 #if targetEnvironment(simulator)
                 Image(systemName: "camera.slash")
@@ -458,11 +614,75 @@ private struct ScanningPlaceholder: View {
                     .foregroundStyle(FMFColors.neutral500)
                 #else
                 ProgressView()
-                    .tint(FMFColors.brandAccent)
+                    .tint(FMFColors.brandPrimary)
                 Text(String(localized: "workout_starting_camera"))
                     .font(FMFTypography.bodyMedium)
                     .foregroundStyle(FMFColors.neutral300)
                 #endif
+            }
+        }
+    }
+}
+
+private struct VoiceCommandPlaceholder: View {
+    let vm: WorkoutViewModel
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [FMFColors.background, FMFColors.surfaceLow],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+
+            VStack(spacing: FMFSpacing.md) {
+                Image(systemName: "waveform.and.mic")
+                    .font(.system(size: 42))
+                    .foregroundStyle(FMFColors.skillStrength)
+
+                Text(String(localized: "workout_sound_ready_title"))
+                    .font(FMFTypography.titleMedium)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white)
+
+                Text(vm.statusHint)
+                    .font(FMFTypography.bodyMedium)
+                    .foregroundStyle(FMFColors.neutral300)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, FMFSpacing.xl)
+            }
+        }
+    }
+}
+
+private struct GuidedTimerPlaceholder: View {
+    let vm: WorkoutViewModel
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [FMFColors.background, FMFColors.surfaceLow],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+
+            VStack(spacing: FMFSpacing.md) {
+                Image(systemName: "timer")
+                    .font(.system(size: 42))
+                    .foregroundStyle(FMFColors.brandPrimary)
+
+                Text(String(localized: "workout_timer_ready_title"))
+                    .font(FMFTypography.titleMedium)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white)
+
+                Text(vm.statusHint)
+                    .font(FMFTypography.bodyMedium)
+                    .foregroundStyle(FMFColors.neutral300)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, FMFSpacing.xl)
             }
         }
     }

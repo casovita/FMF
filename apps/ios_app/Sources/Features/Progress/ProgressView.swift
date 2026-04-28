@@ -8,15 +8,12 @@ struct ProgressScreenView: View {
     @State private var vm: ProgressViewModel?
 
     var body: some View {
-        ZStack {
-            FMFColors.brandPrimary.ignoresSafeArea()
-
-            Group {
-                if let vm {
-                    content(vm: vm)
-                }
+        Group {
+            if let vm {
+                content(vm: vm)
             }
         }
+        .atmosphericScreenBackground()
         .navigationTitle(String(localized: "progressTitle"))
         .navigationBarTitleDisplayMode(.large)
         .toolbarColorScheme(.dark, for: .navigationBar)
@@ -35,7 +32,7 @@ struct ProgressScreenView: View {
     @ViewBuilder
     private func content(vm: ProgressViewModel) -> some View {
         if vm.isLoading {
-            ProgressView().tint(FMFColors.brandAccent)
+            ProgressView().tint(FMFColors.brandPrimary)
         } else if let error = vm.errorMessage {
             VStack(spacing: FMFSpacing.xs) {
                 Text(String(localized: "errorGeneric"))
@@ -118,7 +115,7 @@ private struct ProgressSummaryCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(FMFSpacing.md)
-        .background(FMFColors.darkSurface)
+        .background(FMFColors.surfaceMid)
         .clipShape(RoundedRectangle(cornerRadius: FMFRadius.lg))
     }
 
@@ -141,7 +138,7 @@ private struct ProgressSummaryCard: View {
                 if scheduledDay < today {
                     (String(localized: "urgency_overdue"), FMFColors.warning)
                 } else if scheduledDay == today {
-                    (String(localized: "urgency_today"), FMFColors.brandAccent)
+                    (String(localized: "urgency_today"), FMFColors.brandPrimary)
                 } else {
                     (String(localized: "urgency_upcoming"), FMFColors.neutral300)
                 }

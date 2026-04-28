@@ -8,6 +8,9 @@ struct PracticeSession: Identifiable, Hashable, Codable, Sendable {
     let notes: String?
     let completedAt: Date?
     var setsCompleted: Int = 0
+    var targetValuePerSet: Int = 0
+    var restSeconds: Int = 0
+    var durationSetValues: [Int] = []
     var plannedSessionId: String? = nil
     var isPersonalRecord: Bool = false
     // Raw performance score: seconds for duration skills, total reps for rep skills

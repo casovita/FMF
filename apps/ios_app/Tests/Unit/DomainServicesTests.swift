@@ -299,3 +299,85 @@ struct PracticeSessionCompletionServiceTests {
         #expect(planned?.completedSessionId == "session-1")
     }
 }
+
+@Suite("PracticeSessionDeletionService")
+struct PracticeSessionDeletionServiceTests {
+    @Test("deleting session recalculates PRs and clears planned completion")
+    func deletingSessionRecalculatesPRs() async throws {
+        let db = try AppDatabase.inMemory()
+        let skillRepo = LocalSkillRepository(db: db)
+        let sessionRepo = LocalPracticeSessionRepository(db: db)
+        let trainingRepo = LocalTrainingProgramRepository(db: db)
+        let service = PracticeSessionDeletionService(
+            sessionRepo: sessionRepo,
+            skillRepo: skillRepo,
+            trainingProgramRepo: trainingRepo
+        )
+
+        let program = TrainingProgram(
+            id: "program-1",
+            skillId: "handstand",
+            level: .beginner,
+            weeklyFrequency: 3,
+            generatedAt: Date()
+        )
+        try await trainingRepo.saveProgram(program)
+        try await trainingRepo.savePlannedSessions([
+            PlannedSession(
+                id: "planned-1",
+                programId: "program-1",
+                scheduledDate: Date(),
+                prescription: SessionPrescription(sets: 3, target: .duration(seconds: 20), notes: "Hold quality"),
+                completedSessionId: "session-2",
+                isSkipped: false
+            )
+        ])
+
+        try await sessionRepo.logSession(
+            PracticeSession(
+                id: "session-1",
+                skillId: "handstand",
+                date: Date(timeIntervalSinceNow: -120),
+                durationMinutes: 1,
+                notes: nil,
+                completedAt: Date(timeIntervalSinceNow: -120),
+                setsCompleted: 1,
+                targetValuePerSet: 15,
+                restSeconds: 45,
+                durationSetValues: [15],
+                plannedSessionId: nil,
+                isPersonalRecord: true,
+                sessionScore: 15
+            )
+        )
+        let deletedSession = PracticeSession(
+            id: "session-2",
+            skillId: "handstand",
+            date: Date(),
+            durationMinutes: 1,
+            notes: nil,
+            completedAt: Date(),
+            setsCompleted: 1,
+            targetValuePerSet: 20,
+            restSeconds: 45,
+            durationSetValues: [20],
+            plannedSessionId: "planned-1",
+            isPersonalRecord: true,
+            sessionScore: 20
+        )
+        try await sessionRepo.logSession(deletedSession)
+
+        try await service.deleteSession(deletedSession)
+
+        let remainingSessions = try await sessionRepo.getSessionsForSkill("handstand")
+        let snapshot = try await skillRepo.getProgressSnapshot(skillId: "handstand")
+        let planned = try await trainingRepo.getPlannedSessions(for: "program-1").first
+
+        #expect(remainingSessions.count == 1)
+        #expect(remainingSessions.first?.id == "session-1")
+        #expect(remainingSessions.first?.isPersonalRecord == true)
+        #expect(snapshot?.practiceCount == 1)
+        #expect(snapshot?.lastPracticeDate == remainingSessions.first?.date)
+        #expect(planned?.completedSessionId == nil)
+    }
+}

@@ -13,6 +13,11 @@ enum PoseEvent: Sendable {
     case repCount(Int)
 }
 
+struct PoseJoint: Sendable {
+    let location: CGPoint
+    let confidence: Float
+}
+
 /// Wraps AVCaptureSession + Vision pose detection.
 /// Usage: call configure() first (async), then stream() to get pose events.
 final class PoseDetectionService: NSObject, @unchecked Sendable {
@@ -58,11 +63,7 @@ final class PoseDetectionService: NSObject, @unchecked Sendable {
     // MARK: - Private
 
     private func configureSession() {
-        guard let device = AVCaptureDevice.default(
-            .builtInWideAngleCamera,
-            for: .video,
-            position: .back
-        ) else {
+        guard let device = preferredCamera() else {
             resolveReady(false)
             return
         }
@@ -98,6 +99,26 @@ final class PoseDetectionService: NSObject, @unchecked Sendable {
         }
     }
 
+    private func preferredCamera() -> AVCaptureDevice? {
+        let deviceTypes: [AVCaptureDevice.DeviceType] = [
+            .builtInWideAngleCamera
+        ]
+
+        for position in [AVCaptureDevice.Position.back, .unspecified] {
+            let discovery = AVCaptureDevice.DiscoverySession(
+                deviceTypes: deviceTypes,
+                mediaType: .video,
+                position: position
+            )
+
+            if let device = discovery.devices.first {
+                return device
+            }
+        }
+
+        return nil
+    }
+
     private func resolveReady(_ ready: Bool) {
         readyContinuation?.resume(returning: ready)
         readyContinuation = nil
@@ -126,18 +147,15 @@ final class PoseDetectionService: NSObject, @unchecked Sendable {
     }
 
     /// Vision uses bottom-left origin (y increases upward).
-    /// Handstand = nose is at bottom of image = lower y than hips.
     private func isHandstand(_ observation: VNHumanBodyPoseObservation) -> Bool {
-        guard
-            let nose = try? observation.recognizedPoint(.nose),
-            let lHip = try? observation.recognizedPoint(.leftHip),
-            let rHip = try? observation.recognizedPoint(.rightHip),
-            nose.confidence > 0.3,
-            lHip.confidence > 0.3,
-            rHip.confidence > 0.3
-        else { return false }
-
-        return nose.location.y < lHip.location.y && nose.location.y < rHip.location.y
+        Self.isHandstandHold(
+            leftShoulder: joint(.leftShoulder, in: observation),
+            rightShoulder: joint(.rightShoulder, in: observation),
+            leftHip: joint(.leftHip, in: observation),
+            rightHip: joint(.rightHip, in: observation),
+            leftAnkle: joint(.leftAnkle, in: observation),
+            rightAnkle: joint(.rightAnkle, in: observation)
+        )
     }
 
     private func detectPullupRep(in observation: VNHumanBodyPoseObservation) -> PoseEvent? {
@@ -202,25 +220,63 @@ final class PoseDetectionService: NSObject, @unchecked Sendable {
     }
 
     private func isInverted(_ observation: VNHumanBodyPoseObservation) -> Bool {
+        Self.isInverted(
+            leftShoulder: joint(.leftShoulder, in: observation),
+            rightShoulder: joint(.rightShoulder, in: observation),
+            leftHip: joint(.leftHip, in: observation),
+            rightHip: joint(.rightHip, in: observation),
+            leftAnkle: joint(.leftAnkle, in: observation),
+            rightAnkle: joint(.rightAnkle, in: observation)
+        )
+    }
+
+    private func joint(
+        _ name: VNHumanBodyPoseObservation.JointName,
+        in observation: VNHumanBodyPoseObservation
+    ) -> PoseJoint? {
+        guard let point = try? observation.recognizedPoint(name) else { return nil }
+        return PoseJoint(location: point.location, confidence: point.confidence)
+    }
+
+    static func isHandstandHold(
+        leftShoulder: PoseJoint?,
+        rightShoulder: PoseJoint?,
+        leftHip: PoseJoint?,
+        rightHip: PoseJoint?,
+        leftAnkle: PoseJoint?,
+        rightAnkle: PoseJoint?
+    ) -> Bool {
+        isInverted(
+            leftShoulder: leftShoulder,
+            rightShoulder: rightShoulder,
+            leftHip: leftHip,
+            rightHip: rightHip,
+            leftAnkle: leftAnkle,
+            rightAnkle: rightAnkle
+        )
+    }
+
+    static func isInverted(
+        leftShoulder: PoseJoint?,
+        rightShoulder: PoseJoint?,
+        leftHip: PoseJoint?,
+        rightHip: PoseJoint?,
+        leftAnkle: PoseJoint?,
+        rightAnkle: PoseJoint?
+    ) -> Bool {
         guard
-            let leftAnkle = try? observation.recognizedPoint(.leftAnkle),
-            let rightAnkle = try? observation.recognizedPoint(.rightAnkle),
-            let leftHip = try? observation.recognizedPoint(.leftHip),
-            let rightHip = try? observation.recognizedPoint(.rightHip),
-            let leftShoulder = try? observation.recognizedPoint(.leftShoulder),
-            let rightShoulder = try? observation.recognizedPoint(.rightShoulder),
-            leftAnkle.confidence > 0.2,
-            rightAnkle.confidence > 0.2,
-            leftHip.confidence > 0.2,
-            rightHip.confidence > 0.2,
-            leftShoulder.confidence > 0.2,
-            rightShoulder.confidence > 0.2
+            let leftShoulder, leftShoulder.confidence > 0.2,
+            let rightShoulder, rightShoulder.confidence > 0.2,
+            let leftHip, leftHip.confidence > 0.2,
+            let rightHip, rightHip.confidence > 0.2,
+            let leftAnkle, leftAnkle.confidence > 0.2,
+            let rightAnkle, rightAnkle.confidence > 0.2
         else { return false }
 
-        let ankleY = (leftAnkle.location.y + rightAnkle.location.y) / 2
-        let hipY = (leftHip.location.y + rightHip.location.y) / 2
         let shoulderY = (leftShoulder.location.y + rightShoulder.location.y) / 2
-        return ankleY > hipY && hipY > shoulderY
+        let hipY = (leftHip.location.y + rightHip.location.y) / 2
+        let ankleY = (leftAnkle.location.y + rightAnkle.location.y) / 2
+        return shoulderY < hipY && hipY < ankleY
     }
 
     private func angle(_ a: CGPoint, _ b: CGPoint, _ c: CGPoint) -> Double {

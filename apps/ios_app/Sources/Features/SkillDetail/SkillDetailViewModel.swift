@@ -1,30 +1,101 @@
 import Foundation
 import Observation
 
+struct PersonalRecordPoint: Identifiable, Hashable, Sendable {
+    let id: String
+    let date: Date
+    let score: Int
+}
+
+enum SkillMetricKind: Sendable {
+    case time
+    case reps
+    case weight(unit: String)
+
+    static func from(skill: Skill) -> SkillMetricKind {
+        switch skill.prescriptionType {
+        case .duration:
+            return .time
+        case .reps:
+            return .reps
+        }
+    }
+
+    func headlineValue(for score: Int?) -> String {
+        guard let score, score > 0 else { return String(localized: "skillDetailPRPlaceholder") }
+
+        switch self {
+        case .time:
+            return PRValue.duration(seconds: score).displayString
+        case .reps:
+            return "\(score)"
+        case .weight(let unit):
+            return "\(score) \(unit)"
+        }
+    }
+
+    var headlineUnit: String? {
+        switch self {
+        case .time:
+            return nil
+        case .reps:
+            return String(localized: "practiceSessionRepsUnit")
+        case .weight(let unit):
+            return unit
+        }
+    }
+}
+
+struct PersonalRecordChartState: Sendable {
+    let metricKind: SkillMetricKind
+    let currentScore: Int?
+    let points: [PersonalRecordPoint]
+
+    var headlineValue: String {
+        metricKind.headlineValue(for: currentScore)
+    }
+
+    var headlineUnit: String? {
+        metricKind.headlineUnit
+    }
+
+    var trendText: String {
+        guard points.count > 1, let first = points.first?.score, let last = points.last?.score else {
+            return String(localized: "skillDetailTrendWaiting")
+        }
+
+        if last > first {
+            return String(localized: "skillDetailTrendIncreasing")
+        }
+
+        return String(localized: "skillDetailTrendNoChange")
+    }
+
+    var isEmpty: Bool {
+        points.isEmpty
+    }
+
+    static func empty(metricKind: SkillMetricKind) -> PersonalRecordChartState {
+        PersonalRecordChartState(metricKind: metricKind, currentScore: nil, points: [])
+    }
+}
+
 @Observable
 @MainActor
 final class SkillDetailViewModel {
     private(set) var skill: Skill?
-    private(set) var userSkill: UserSkill?
-    private(set) var currentProgram: TrainingProgram?
     private(set) var plannedSessions: [PlannedSession] = []
-    private(set) var stats: SkillStats?
-    private(set) var progress: ProgressSnapshot?
+    private(set) var sessions: [PracticeSession] = []
+    private(set) var chartState = PersonalRecordChartState.empty(metricKind: .time)
     private(set) var isLoading = false
+    private(set) var isDeletingSession = false
     private(set) var errorMessage: String?
-    private(set) var isSaving = false
 
     private let skillId: String
     private let skillRepo: any SkillRepository
-    private let userSkillRepo: any UserSkillRepository
     private let trainingProgramRepo: any TrainingProgramRepository
     private let sessionRepo: any PracticeSessionRepository
-    private let planGenerator = PlanGenerator()
-    private let statsAggregator = StatsAggregator()
-
-    var selectedLevel: SkillLevel = .beginner
-    var weeklyFrequency: Int = 3
-    var isActive = true
+    private let deletionService: any PracticeSessionDeleting
 
     var nextPlannedSession: PlannedSession? {
         let now = Date()
@@ -41,15 +112,19 @@ final class SkillDetailViewModel {
     init(
         skillId: String,
         skillRepo: any SkillRepository,
-        userSkillRepo: any UserSkillRepository,
         trainingProgramRepo: any TrainingProgramRepository,
-        sessionRepo: any PracticeSessionRepository
+        sessionRepo: any PracticeSessionRepository,
+        deletionService: (any PracticeSessionDeleting)? = nil
     ) {
         self.skillId = skillId
         self.skillRepo = skillRepo
-        self.userSkillRepo = userSkillRepo
         self.trainingProgramRepo = trainingProgramRepo
         self.sessionRepo = sessionRepo
+        self.deletionService = deletionService ?? PracticeSessionDeletionService(
+            sessionRepo: sessionRepo,
+            skillRepo: skillRepo,
+            trainingProgramRepo: trainingProgramRepo
+        )
     }
 
     func load() async {
@@ -57,20 +132,11 @@ final class SkillDetailViewModel {
         errorMessage = nil
         do {
             async let fetchedSkill = skillRepo.getSkillById(skillId)
-            async let fetchedUserSkill = userSkillRepo.getUserSkill(id: skillId)
-            async let fetchedProgress = skillRepo.getProgressSnapshot(skillId: skillId)
-            let (skill, userSkill, progress) = try await (fetchedSkill, fetchedUserSkill, fetchedProgress)
+            let skill = try await fetchedSkill
             self.skill = skill
-            self.userSkill = userSkill
-            self.progress = progress
+            chartState = PersonalRecordChartState.empty(metricKind: skill.map(SkillMetricKind.from) ?? .time)
 
-            if let userSkill {
-                selectedLevel = userSkill.level
-                weeklyFrequency = userSkill.weeklyFrequency
-                isActive = userSkill.isActive
-            }
-
-            currentProgram = try await trainingProgramRepo.getProgram(for: skillId)
+            let currentProgram = try await trainingProgramRepo.getProgram(for: skillId)
             if let program = currentProgram {
                 plannedSessions = try await trainingProgramRepo.getPlannedSessions(for: program.id)
             } else {
@@ -79,11 +145,8 @@ final class SkillDetailViewModel {
 
             if let skill {
                 let sessions = try await sessionRepo.getSessionsForSkill(skillId)
-                stats = statsAggregator.compute(
-                    sessions: sessions,
-                    plannedSessions: plannedSessions,
-                    skill: skill
-                )
+                self.sessions = sessions.sorted { $0.date > $1.date }
+                chartState = buildChartState(skill: skill, sessions: sessions)
             }
         } catch {
             errorMessage = error.localizedDescription
@@ -92,55 +155,51 @@ final class SkillDetailViewModel {
     }
 
     func watchProgress() async {
-        for await snapshot in skillRepo.skillProgressStream(skillId: skillId) {
-            progress = snapshot
+        for await _ in skillRepo.skillProgressStream(skillId: skillId) {
+            guard let skill else { continue }
+            if let sessions = try? await sessionRepo.getSessionsForSkill(skillId) {
+                self.sessions = sessions.sorted { $0.date > $1.date }
+                chartState = buildChartState(skill: skill, sessions: sessions)
+            }
         }
     }
 
-    func saveSettings() async {
-        guard let skill else { return }
-        isSaving = true
+    func deleteSession(_ session: PracticeSession) async {
+        guard !isDeletingSession else { return }
+        isDeletingSession = true
         errorMessage = nil
-        defer { isSaving = false }
+        defer { isDeletingSession = false }
 
         do {
-            var updatedUserSkill = userSkill ?? UserSkill(
-                skillId: skill.id,
-                level: selectedLevel,
-                weeklyFrequency: weeklyFrequency
-            )
-            updatedUserSkill.level = selectedLevel
-            updatedUserSkill.weeklyFrequency = weeklyFrequency
-            updatedUserSkill.isActive = isActive
-            try await userSkillRepo.saveUserSkill(updatedUserSkill)
-            userSkill = updatedUserSkill
-            var latestPlannedSessions: [PlannedSession] = []
-
-            if isActive {
-                let sessions = try await sessionRepo.getSessionsForSkill(skill.id)
-                let recentSessions = Array(sessions.prefix(3))
-                let (program, generatedSessions) = planGenerator.generate(
-                    userSkill: updatedUserSkill,
-                    skill: skill,
-                    recentSessions: recentSessions
-                )
-                try await trainingProgramRepo.saveProgram(program)
-                try await trainingProgramRepo.savePlannedSessions(generatedSessions)
-                currentProgram = program
-                latestPlannedSessions = generatedSessions
-                self.plannedSessions = generatedSessions
-            } else {
-                currentProgram = nil
-                self.plannedSessions = []
+            try await deletionService.deleteSession(session)
+            if let skill {
+                let updatedSessions = try await sessionRepo.getSessionsForSkill(skillId)
+                sessions = updatedSessions.sorted { $0.date > $1.date }
+                chartState = buildChartState(skill: skill, sessions: updatedSessions)
             }
-
-            stats = statsAggregator.compute(
-                sessions: try await sessionRepo.getSessionsForSkill(skill.id),
-                plannedSessions: latestPlannedSessions,
-                skill: skill
-            )
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    private func buildChartState(skill: Skill, sessions: [PracticeSession]) -> PersonalRecordChartState {
+        let metricKind = SkillMetricKind.from(skill: skill)
+        let orderedSessions = sessions.sorted { $0.date < $1.date }
+        var runningBest = 0
+        let points = orderedSessions.map { session -> PersonalRecordPoint in
+            runningBest = max(runningBest, session.sessionScore)
+            return PersonalRecordPoint(
+                id: session.id,
+                date: session.date,
+                score: runningBest
+            )
+        }
+        let currentScore = points.last?.score
+
+        return PersonalRecordChartState(
+            metricKind: metricKind,
+            currentScore: currentScore,
+            points: points
+        )
     }
 }

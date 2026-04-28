@@ -11,4 +11,12 @@ extension WorkoutViewModel {
     func testSetRepCount(_ count: Int) {
         repCount = count
     }
+
+    func testHandlePoseEvent(_ event: PoseEvent) async {
+        await handlePoseEvent(event)
+    }
+
+    func testCountdownEffect(for remaining: Int) -> WorkoutSoundEffect {
+        countdownEffect(for: remaining)
+    }
 }

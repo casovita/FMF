@@ -81,6 +81,19 @@ final class AppDatabase: Sendable {
             }
         }
 
+        migrator.registerMigration("v3") { db in
+            try db.alter(table: "practice_sessions") { t in
+                t.add(column: "targetValuePerSet", .integer).notNull().defaults(to: 0)
+                t.add(column: "restSeconds", .integer).notNull().defaults(to: 0)
+            }
+        }
+
+        migrator.registerMigration("v4") { db in
+            try db.alter(table: "practice_sessions") { t in
+                t.add(column: "durationSetValuesData", .blob)
+            }
+        }
+
         try migrator.migrate(dbWriter)
     }
 }

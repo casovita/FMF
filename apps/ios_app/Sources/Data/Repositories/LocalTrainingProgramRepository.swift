@@ -75,6 +75,15 @@ final class LocalTrainingProgramRepository: TrainingProgramRepository {
         }
     }
 
+    func clearCompletedSession(id: String) async throws {
+        try await db.dbWriter.write { db in
+            try db.execute(
+                sql: "UPDATE planned_sessions SET completedSessionId = NULL WHERE id = ?",
+                arguments: [id]
+            )
+        }
+    }
+
     func skipSession(id: String) async throws {
         try await db.dbWriter.write { db in
             try db.execute(

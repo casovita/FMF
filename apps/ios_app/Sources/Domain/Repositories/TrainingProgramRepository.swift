@@ -8,5 +8,6 @@ protocol TrainingProgramRepository: Sendable {
     func savePlannedSession(_ session: PlannedSession) async throws
     func savePlannedSessions(_ sessions: [PlannedSession]) async throws
     func markSessionComplete(id: String, completedSessionId: String) async throws
+    func clearCompletedSession(id: String) async throws
     func skipSession(id: String) async throws
 }
