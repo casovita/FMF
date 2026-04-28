@@ -144,7 +144,7 @@ struct PracticeSessionDraft: Hashable, Codable, Sendable {
             skillId: skillId,
             date: date,
             durationMinutes: max(1, Int(ceil(Double(max(totalSessionSeconds, 1)) / 60.0))),
-            notes: completedDraft.mergedNotes(with: completedDraft.executionSummary(mode: .timer, elapsedSeconds: bestSet, repCount: 0)),
+            notes: completedDraft.mergedNotes(with: completedDraft.executionSummary(mode: .manual, elapsedSeconds: bestSet, repCount: 0)),
             completedAt: completedAt,
             setsCompleted: completedDraft.setsCompleted,
             targetValuePerSet: completedDraft.resolvedTargetValuePerSet,
@@ -153,6 +153,35 @@ struct PracticeSessionDraft: Hashable, Codable, Sendable {
             plannedSessionId: plannedSessionId,
             isPersonalRecord: false,
             sessionScore: bestSet
+        )
+    }
+
+    func makeManualRepSession(
+        repCounts: [Int],
+        totalElapsedSeconds: Int,
+        id: String = UUID().uuidString,
+        date: Date = Date(),
+        completedAt: Date = Date()
+    ) -> PracticeSession {
+        let totalReps = repCounts.reduce(0, +)
+        let durationMinutes = max(1, Int(ceil(Double(max(totalElapsedSeconds, 1)) / 60.0)))
+        let format = String(localized: "workout_manual_rep_summary_format")
+        let summary = String(format: format, totalReps, repCounts.count)
+
+        return PracticeSession(
+            id: id,
+            skillId: skillId,
+            date: date,
+            durationMinutes: durationMinutes,
+            notes: mergedNotes(with: summary),
+            completedAt: completedAt,
+            setsCompleted: repCounts.count,
+            targetValuePerSet: targetValuePerSet,
+            restSeconds: restSeconds,
+            durationSetValues: repCounts,
+            plannedSessionId: plannedSessionId,
+            isPersonalRecord: false,
+            sessionScore: totalReps
         )
     }
 

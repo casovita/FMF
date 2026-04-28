@@ -1,14 +1,14 @@
 import Foundation
 
 enum WorkoutMode {
-    case timer
+    case manual
     case smart
     case sound
 
     var summaryLabel: String {
         switch self {
-        case .timer:
-            return "Timer"
+        case .manual:
+            return "Manual"
         case .smart:
             return "Smart"
         case .sound:

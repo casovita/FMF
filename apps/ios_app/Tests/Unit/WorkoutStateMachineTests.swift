@@ -104,16 +104,16 @@ struct WorkoutStateMachineTests {
         }
     }
 
-    @Test("selecting timer mode skips camera setup")
-    func timerModeSkipsCamera() async {
+    @Test("selecting manual mode skips camera setup")
+    func manualModeSkipsCamera() async {
         let vm = makeDurationVM()
-        await vm.selectMode(.timer)
+        await vm.selectMode(.manual)
         #expect(vm.state == .idle)
         #expect(vm.captureSession == nil)
     }
 
-    @Test("timer mode starts with 10 second get ready countdown")
-    func timerModeStartsInitialCountdown() async {
+    @Test("manual mode starts with 10 second get ready countdown")
+    func manualModeStartsInitialCountdown() async {
         let draft = PracticeSessionDraft(
             skillId: "handstand",
             prescriptionType: .duration,
@@ -125,7 +125,7 @@ struct WorkoutStateMachineTests {
             plannedSessionId: nil
         )
         let vm = makeDurationVM(sessionDraft: draft)
-        await vm.selectMode(.timer)
+        await vm.selectMode(.manual)
 
         vm.manualStart()
         await Task.yield()
@@ -142,12 +142,13 @@ struct WorkoutStateMachineTests {
         #expect(Array(effects.suffix(3)) == Array(repeating: .countdownFinalTick, count: 3))
     }
 
-    @Test("rep skills do not allow timer mode")
-    func repSkillsSkipTimerMode() async {
+    @Test("rep skills allow manual mode with rep-set flow")
+    func repSkillsAllowManualMode() async {
         let vm = makeRepVM()
-        await vm.selectMode(.timer)
-        #expect(vm.state == .modeSelection)
-        #expect(vm.allowsManualMode == false)
+        await vm.selectMode(.manual)
+        #expect(vm.state == .idle)
+        #expect(vm.allowsManualMode == true)
+        #expect(vm.isRepManualMode == true)
     }
 
     @Test("sound mode starts listening and responds to voice commands")
@@ -325,7 +326,7 @@ struct WorkoutStateMachineTests {
             )
         )
 
-        await vm.selectMode(.timer)
+        await vm.selectMode(.manual)
         vm.manualStart()
         try? await Task.sleep(for: .seconds(4.6))
 
@@ -364,7 +365,7 @@ struct WorkoutStateMachineTests {
             )
         )
 
-        await vm.selectMode(.timer)
+        await vm.selectMode(.manual)
         vm.manualStart()
         try? await Task.sleep(for: .seconds(5.5))
 
@@ -425,6 +426,142 @@ struct WorkoutStateMachineTests {
             .repCounted,
             .repCounted
         ])
+    }
+
+    @Test("rep manual mode — confirmRepSet advances set and saves on last set")
+    func repManualModeAdvancesSetAndSaves() async {
+        let completionService = MockWorkoutCompletionService()
+        let draft = PracticeSessionDraft(
+            skillId: "pullups",
+            prescriptionType: .reps,
+            setsCompleted: 2,
+            targetValuePerSet: 8,
+            restSeconds: 0,
+            durationSetValues: [],
+            notes: nil,
+            plannedSessionId: nil
+        )
+        let vm = WorkoutViewModel(
+            skillId: "pullups",
+            prescriptionType: .reps,
+            completionService: completionService,
+            sessionDraft: draft,
+            soundPlayer: MockWorkoutSoundPlayer()
+        )
+
+        await vm.selectMode(.manual)
+        #expect(vm.state == .idle)
+        #expect(vm.manualCurrentSet == 1)
+        #expect(vm.isRepManualMode == true)
+
+        vm.manualStart()
+        let isActiveAfterStart: Bool
+        if case .active = vm.state {
+            isActiveAfterStart = true
+        } else {
+            isActiveAfterStart = false
+        }
+        #expect(isActiveAfterStart)
+
+        vm.doneWithSet()
+        #expect(vm.repEntryPending == true)
+
+        await vm.confirmRepSet(reps: 7)
+        #expect(vm.manualCurrentSet == 2)
+        #expect(vm.repEntryPending == false)
+        #expect(vm.state == .idle)
+
+        vm.manualStart()
+        vm.doneWithSet()
+        await vm.confirmRepSet(reps: 9)
+
+        let isCompleteAfterFinalSet: Bool
+        if case .complete = vm.state {
+            isCompleteAfterFinalSet = true
+        } else {
+            isCompleteAfterFinalSet = false
+        }
+        #expect(isCompleteAfterFinalSet)
+        #expect(completionService.completedSessions.count == 1)
+        #expect(completionService.completedSessions[0].sessionScore == 16)
+        #expect(completionService.completedSessions[0].setsCompleted == 2)
+        #expect(completionService.completedSessions[0].durationSetValues == [7, 9])
+        #expect(completionService.completedSessions[0].targetValuePerSet == 8)
+        #expect(completionService.completedSessions[0].restSeconds == 0)
+    }
+
+    @Test("rep manual mode — cancelRepEntry resumes active state")
+    func repManualModeCancelRepEntryResumesActive() async {
+        let draft = PracticeSessionDraft(
+            skillId: "pullups",
+            prescriptionType: .reps,
+            setsCompleted: 2,
+            targetValuePerSet: 8,
+            restSeconds: 60,
+            durationSetValues: [],
+            notes: nil,
+            plannedSessionId: nil
+        )
+        let vm = WorkoutViewModel(
+            skillId: "pullups",
+            prescriptionType: .reps,
+            completionService: MockWorkoutCompletionService(),
+            sessionDraft: draft,
+            soundPlayer: MockWorkoutSoundPlayer()
+        )
+
+        await vm.selectMode(.manual)
+        vm.manualStart()
+        vm.doneWithSet()
+        #expect(vm.repEntryPending == true)
+
+        vm.cancelRepEntry()
+        #expect(vm.repEntryPending == false)
+        let isActiveAfterCancel: Bool
+        if case .active = vm.state {
+            isActiveAfterCancel = true
+        } else {
+            isActiveAfterCancel = false
+        }
+        #expect(isActiveAfterCancel)
+    }
+
+    @Test("camera guide spec uses skill-specific markers")
+    func cameraGuideSpecMatchesSkill() {
+        let handstand = Skill(
+            id: "handstand",
+            name: "Handstand",
+            description: "",
+            category: .balance,
+            prescriptionType: .duration
+        )
+        let handstandSpec = cameraGuideSpec(for: handstand)
+        #expect(handstandSpec.badgeTitle == "Handstand")
+        #expect(handstandSpec.markers.map(\.id) == ["hands", "hips", "toes"])
+
+        let pullups = Skill(
+            id: "pullups",
+            name: "Pull-ups",
+            description: "",
+            category: .strength,
+            prescriptionType: .reps
+        )
+        let pullupSpec = cameraGuideSpec(for: pullups)
+        #expect(pullupSpec.markers.map(\.id) == ["bar", "chest", "feet"])
+        #expect(pullupSpec.frameOffsetY < 0)
+
+        let hspu = Skill(
+            id: "handstand_pushups",
+            name: "Handstand Push-ups",
+            description: "",
+            category: .bodyweight,
+            prescriptionType: .reps
+        )
+        let hspuSpec = cameraGuideSpec(for: hspu)
+        #expect(hspuSpec.markers.map(\.id) == ["hands", "head", "toes"])
+
+        let genericSpec = cameraGuideSpec(for: nil)
+        #expect(genericSpec.markers.map(\.id) == ["head", "center", "feet"])
     }
 
     @Test("error paths emit error sound")

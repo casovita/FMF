@@ -85,7 +85,7 @@ struct WorkoutView: View {
                 Task { await vm.selectMode(mode) }
             }
         default:
-            WorkoutCameraView(vm: vm, dismiss: { dismiss() })
+            WorkoutCameraView(vm: vm, skill: skill, dismiss: { dismiss() })
         }
     }
 
@@ -155,12 +155,12 @@ private struct ModeSelectionView: View {
 
                     if showsManualTracking {
                         ModeCard(
-                            accessibilityIdentifier: "workout.mode.timer",
+                            accessibilityIdentifier: "workout.mode.manual",
                             systemImage: "hand.tap",
-                            title: String(localized: "workout_mode_timer_title"),
-                            subtitle: String(localized: "workout_mode_timer_subtitle"),
+                            title: String(localized: "workout_mode_manual_title"),
+                            subtitle: String(localized: "workout_mode_manual_subtitle"),
                             color: FMFColors.brandPrimary
-                        ) { onSelect(.timer) }
+                        ) { onSelect(.manual) }
 
                         Spacer().frame(height: FMFSpacing.md)
 
@@ -243,6 +243,7 @@ private struct ModeCard: View {
 
 private struct WorkoutCameraView: View {
     let vm: WorkoutViewModel
+    let skill: Skill?
     let dismiss: () -> Void
 
     var body: some View {
@@ -252,7 +253,11 @@ private struct WorkoutCameraView: View {
                 CameraPreviewView(session: session)
                     .ignoresSafeArea()
             } else if vm.modeUsesGuidedTimer {
-                GuidedTimerPlaceholder(vm: vm)
+                if vm.isRepManualMode {
+                    RepManualPlaceholder(vm: vm)
+                } else {
+                    GuidedTimerPlaceholder(vm: vm)
+                }
             } else if vm.modeUsesVoiceCommands {
                 VoiceCommandPlaceholder(vm: vm)
             } else {
@@ -260,7 +265,7 @@ private struct WorkoutCameraView: View {
             }
 
             if vm.modeUsesCamera {
-                CameraPositionGuide()
+                CameraPositionGuide(skill: skill)
                     .ignoresSafeArea()
                     .allowsHitTesting(false)
             }
@@ -294,6 +299,16 @@ private struct WorkoutCameraView: View {
         }
         .background(Color.black)
         .ignoresSafeArea()
+        .sheet(isPresented: Binding(
+            get: { vm.repEntryPending },
+            set: { isPresented in
+                if !isPresented && vm.repEntryPending {
+                    vm.cancelRepEntry()
+                }
+            }
+        )) {
+            RepSetEntrySheet(vm: vm)
+        }
         .safeAreaInset(edge: .top) {
             HStack {
                 GlassIconButton(
@@ -308,16 +323,172 @@ private struct WorkoutCameraView: View {
     }
 }
 
+struct WorkoutCameraGuideMarker: Identifiable {
+    let id: String
+    let systemImage: String
+    let labelKey: LocalizedStringResource
+    let normalizedX: CGFloat
+    let normalizedY: CGFloat
+}
+
+struct WorkoutCameraGuideSpec {
+    let badgeTitle: String
+    let titleKey: LocalizedStringResource
+    let subtitleKey: LocalizedStringResource
+    let markers: [WorkoutCameraGuideMarker]
+    let frameWidthRatio: CGFloat
+    let frameHeightRatio: CGFloat
+    let frameOffsetY: CGFloat
+}
+
+func cameraGuideSpec(for skill: Skill?) -> WorkoutCameraGuideSpec {
+    let skillName = skill?.name ?? String(localized: "workout_camera_guide_generic_badge")
+
+    switch skill?.id {
+    case "handstand":
+        return WorkoutCameraGuideSpec(
+            badgeTitle: skillName,
+            titleKey: "workout_camera_guide_title",
+            subtitleKey: "workout_camera_guide_handstand_subtitle",
+            markers: [
+                WorkoutCameraGuideMarker(
+                    id: "hands",
+                    systemImage: "hand.raised",
+                    labelKey: "workout_camera_guide_handstand_hands",
+                    normalizedX: 0.5,
+                    normalizedY: 0.84
+                ),
+                WorkoutCameraGuideMarker(
+                    id: "hips",
+                    systemImage: "arrow.up.and.down",
+                    labelKey: "workout_camera_guide_handstand_hips",
+                    normalizedX: 0.5,
+                    normalizedY: 0.5
+                ),
+                WorkoutCameraGuideMarker(
+                    id: "toes",
+                    systemImage: "figure.flexibility",
+                    labelKey: "workout_camera_guide_handstand_toes",
+                    normalizedX: 0.5,
+                    normalizedY: 0.12
+                )
+            ],
+            frameWidthRatio: 0.62,
+            frameHeightRatio: 0.62,
+            frameOffsetY: -24
+        )
+    case "pullups":
+        return WorkoutCameraGuideSpec(
+            badgeTitle: skillName,
+            titleKey: "workout_camera_guide_title",
+            subtitleKey: "workout_camera_guide_pullups_subtitle",
+            markers: [
+                WorkoutCameraGuideMarker(
+                    id: "bar",
+                    systemImage: "line.3.horizontal",
+                    labelKey: "workout_camera_guide_pullups_bar",
+                    normalizedX: 0.5,
+                    normalizedY: 0.08
+                ),
+                WorkoutCameraGuideMarker(
+                    id: "chest",
+                    systemImage: "figure.strengthtraining.traditional",
+                    labelKey: "workout_camera_guide_pullups_chest",
+                    normalizedX: 0.5,
+                    normalizedY: 0.34
+                ),
+                WorkoutCameraGuideMarker(
+                    id: "feet",
+                    systemImage: "figure.walk",
+                    labelKey: "workout_camera_guide_pullups_feet",
+                    normalizedX: 0.5,
+                    normalizedY: 0.7
+                )
+            ],
+            frameWidthRatio: 0.66,
+            frameHeightRatio: 0.54,
+            frameOffsetY: -72
+        )
+    case "handstand_pushups":
+        return WorkoutCameraGuideSpec(
+            badgeTitle: skillName,
+            titleKey: "workout_camera_guide_title",
+            subtitleKey: "workout_camera_guide_hspu_subtitle",
+            markers: [
+                WorkoutCameraGuideMarker(
+                    id: "hands",
+                    systemImage: "hand.raised",
+                    labelKey: "workout_camera_guide_hspu_hands",
+                    normalizedX: 0.5,
+                    normalizedY: 0.84
+                ),
+                WorkoutCameraGuideMarker(
+                    id: "head",
+                    systemImage: "person.crop.circle",
+                    labelKey: "workout_camera_guide_hspu_head",
+                    normalizedX: 0.5,
+                    normalizedY: 0.54
+                ),
+                WorkoutCameraGuideMarker(
+                    id: "toes",
+                    systemImage: "figure.flexibility",
+                    labelKey: "workout_camera_guide_hspu_toes",
+                    normalizedX: 0.5,
+                    normalizedY: 0.14
+                )
+            ],
+            frameWidthRatio: 0.62,
+            frameHeightRatio: 0.64,
+            frameOffsetY: -32
+        )
+    default:
+        return WorkoutCameraGuideSpec(
+            badgeTitle: skillName,
+            titleKey: "workout_camera_guide_title",
+            subtitleKey: "workout_camera_guide_subtitle",
+            markers: [
+                WorkoutCameraGuideMarker(
+                    id: "head",
+                    systemImage: "person.crop.circle",
+                    labelKey: "workout_camera_guide_head",
+                    normalizedX: 0.5,
+                    normalizedY: 0.1
+                ),
+                WorkoutCameraGuideMarker(
+                    id: "center",
+                    systemImage: "arrow.up.and.down",
+                    labelKey: "workout_camera_guide_midline",
+                    normalizedX: 0.5,
+                    normalizedY: 0.5
+                ),
+                WorkoutCameraGuideMarker(
+                    id: "feet",
+                    systemImage: "figure.walk",
+                    labelKey: "workout_camera_guide_feet",
+                    normalizedX: 0.5,
+                    normalizedY: 0.92
+                )
+            ],
+            frameWidthRatio: 0.62,
+            frameHeightRatio: 0.62,
+            frameOffsetY: -24
+        )
+    }
+}
+
 private struct CameraPositionGuide: View {
+    let skill: Skill?
+
     var body: some View {
         GeometryReader { proxy in
+            let spec = cameraGuideSpec(for: skill)
             let width = proxy.size.width
             let height = proxy.size.height
-            let guideWidth = min(width * 0.62, 300)
-            let guideHeight = min(height * 0.62, 520)
+            let guideWidth = min(width * spec.frameWidthRatio, 300)
+            let guideHeight = min(height * spec.frameHeightRatio, 520)
             let guideRect = CGRect(
                 x: (width - guideWidth) / 2,
-                y: max(100, (height - guideHeight) / 2 - 24),
+                y: max(100, (height - guideHeight) / 2 + spec.frameOffsetY),
                 width: guideWidth,
                 height: guideHeight
             )
@@ -337,33 +508,27 @@ private struct CameraPositionGuide: View {
                 }
                 .stroke(.white.opacity(0.24), style: StrokeStyle(lineWidth: 1, dash: [6, 8]))
 
-                Group {
-                    guideMarker(
-                        systemImage: "person.crop.circle",
-                        label: String(localized: "workout_camera_guide_head")
-                    )
-                    .position(x: guideRect.midX, y: guideRect.minY + 42)
+                guideBadge(title: spec.badgeTitle)
+                    .position(x: guideRect.midX, y: guideRect.minY - 16)
 
+                ForEach(spec.markers) { marker in
                     guideMarker(
-                        systemImage: "arrow.up.and.down",
-                        label: String(localized: "workout_camera_guide_midline")
+                        systemImage: marker.systemImage,
+                        label: String(localized: marker.labelKey)
                     )
-                    .position(x: guideRect.midX, y: guideRect.midY)
-
-                    guideMarker(
-                        systemImage: "figure.walk",
-                        label: String(localized: "workout_camera_guide_feet")
+                    .position(
+                        x: guideRect.minX + (guideRect.width * marker.normalizedX),
+                        y: guideRect.minY + (guideRect.height * marker.normalizedY)
                     )
-                    .position(x: guideRect.midX, y: guideRect.maxY - 42)
                 }
 
                 VStack(spacing: FMFSpacing.xs) {
-                    Text(String(localized: "workout_camera_guide_title"))
+                    Text(String(localized: spec.titleKey))
                         .font(FMFTypography.labelMedium)
                         .fontWeight(.bold)
                         .foregroundStyle(.white.opacity(0.92))
 
-                    Text(String(localized: "workout_camera_guide_subtitle"))
+                    Text(String(localized: spec.subtitleKey))
                         .font(FMFTypography.bodySmall)
                         .foregroundStyle(.white.opacity(0.62))
                         .multilineTextAlignment(.center)
@@ -381,6 +546,22 @@ private struct CameraPositionGuide: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .accessibilityHidden(true)
+    }
+
+    @ViewBuilder
+    private func guideBadge(title: String) -> some View {
+        Text(title)
+            .font(FMFTypography.labelMedium)
+            .fontWeight(.bold)
+            .foregroundStyle(.white.opacity(0.94))
+            .padding(.horizontal, FMFSpacing.md)
+            .padding(.vertical, FMFSpacing.xs)
+            .background(.black.opacity(0.32))
+            .clipShape(Capsule())
+            .overlay {
+                Capsule()
+                    .strokeBorder(.white.opacity(0.16), lineWidth: 1)
+            }
     }
 
     @ViewBuilder
@@ -482,7 +663,7 @@ private struct WorkoutMetricDisplay: View {
     let vm: WorkoutViewModel
 
     var body: some View {
-        if vm.usesRepCounting {
+        if vm.usesRepCounting && vm.modeUsesCamera {
             VStack(spacing: 8) {
                 Text("\(vm.repCount)")
                     .font(.system(size: 64, weight: .bold).monospacedDigit())
@@ -517,8 +698,11 @@ private struct ActionButtons: View {
         case .idle:
             VStack(spacing: FMFSpacing.sm) {
                 if vm.shouldShowManualStart {
+                    let label = vm.isRepManualMode
+                        ? String(format: String(localized: "workout_start_set_format"), vm.manualCurrentSet)
+                        : String(localized: "workout_start_timer")
                     GlassPillButton(
-                        label: String(localized: "workout_start_timer"),
+                        label: label,
                         systemImage: "play.fill",
                         color: FMFColors.brandPrimary
                     ) { vm.manualStart() }
@@ -528,6 +712,13 @@ private struct ActionButtons: View {
                     .font(FMFTypography.bodySmall)
                     .foregroundStyle(.white.opacity(0.4))
             }
+
+        case .active where vm.isRepManualMode:
+            GlassPillButton(
+                label: String(localized: "workout_done_with_set"),
+                systemImage: "checkmark",
+                color: FMFColors.success
+            ) { vm.doneWithSet() }
 
         case .countdown, .resting, .active, .paused:
             GlassPillButton(
@@ -685,5 +876,102 @@ private struct GuidedTimerPlaceholder: View {
                     .padding(.horizontal, FMFSpacing.xl)
             }
         }
+    }
+}
+
+private struct RepManualPlaceholder: View {
+    let vm: WorkoutViewModel
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [FMFColors.background, FMFColors.surfaceLow],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+
+            VStack(spacing: FMFSpacing.md) {
+                Image(systemName: "figure.strengthtraining.traditional")
+                    .font(.system(size: 42))
+                    .foregroundStyle(FMFColors.brandPrimary)
+
+                Text(String(localized: "workout_rep_manual_ready_title"))
+                    .font(FMFTypography.titleMedium)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white)
+
+                Text(vm.statusHint)
+                    .font(FMFTypography.bodyMedium)
+                    .foregroundStyle(FMFColors.neutral300)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, FMFSpacing.xl)
+            }
+        }
+    }
+}
+
+private struct RepSetEntrySheet: View {
+    let vm: WorkoutViewModel
+
+    @State private var reps: Int
+
+    init(vm: WorkoutViewModel) {
+        self.vm = vm
+        _reps = State(initialValue: max(1, vm.manualTargetRepsPerSet))
+    }
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: FMFSpacing.xl) {
+                Text(String(format: String(localized: "workout_rep_entry_title_format"), vm.manualCurrentSet))
+                    .font(FMFTypography.headlineSmall)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.white)
+                    .padding(.top, FMFSpacing.xl)
+
+                Stepper(
+                    value: $reps,
+                    in: 1...999
+                ) {
+                    HStack(alignment: .firstTextBaseline, spacing: FMFSpacing.xs) {
+                        Text("\(reps)")
+                            .font(.system(size: 56, weight: .bold).monospacedDigit())
+                            .foregroundStyle(.white)
+                        Text(String(localized: "workout_reps_label"))
+                            .font(FMFTypography.bodyMedium)
+                            .foregroundStyle(FMFColors.neutral500)
+                    }
+                }
+                .padding(.horizontal, FMFSpacing.xl)
+
+                Button {
+                    Task { await vm.confirmRepSet(reps: reps) }
+                } label: {
+                    Text(String(localized: "workout_rep_entry_confirm"))
+                        .font(FMFTypography.titleSmall)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(FMFSpacing.md)
+                        .background(FMFColors.brandPrimary.opacity(0.8))
+                        .clipShape(RoundedRectangle(cornerRadius: FMFRadius.lg))
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, FMFSpacing.lg)
+
+                Spacer()
+            }
+            .atmosphericScreenBackground()
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(String(localized: "workout_rep_entry_cancel")) {
+                        vm.cancelRepEntry()
+                    }
+                    .foregroundStyle(FMFColors.neutral300)
+                }
+            }
+        }
+        .presentationDetents([.medium])
     }
 }

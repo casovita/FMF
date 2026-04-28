@@ -30,6 +30,9 @@ final class WorkoutViewModel {
     private var mode: WorkoutMode = .smart
     private var completedTimerSetDurations: [Int] = []
     private var guidedTimerEffectiveRestSeconds = 0
+    private(set) var manualCurrentSet: Int = 1
+    private(set) var manualRepCounts: [Int] = []
+    private(set) var repEntryPending: Bool = false
 
     init(
         skillId: String,
@@ -53,9 +56,7 @@ final class WorkoutViewModel {
         self.timingConfiguration = timingConfiguration
     }
 
-    var allowsManualMode: Bool {
-        prescriptionType == .duration
-    }
+    var allowsManualMode: Bool { true }
 
     var allowsSoundMode: Bool {
         prescriptionType == .duration
@@ -74,11 +75,23 @@ final class WorkoutViewModel {
     }
 
     var modeUsesGuidedTimer: Bool {
-        mode == .timer
+        mode == .manual
     }
 
     var shouldShowManualStart: Bool {
-        mode == .timer && allowsManualMode
+        mode == .manual
+    }
+
+    var isRepManualMode: Bool {
+        mode == .manual && prescriptionType == .reps
+    }
+
+    var manualTotalSets: Int {
+        sessionDraft?.setsCompleted ?? 1
+    }
+
+    var manualTargetRepsPerSet: Int {
+        sessionDraft?.targetValuePerSet ?? 0
     }
 
     var displaySeconds: Int {
@@ -94,7 +107,7 @@ final class WorkoutViewModel {
 
     var idleStatusLabel: String {
         switch mode {
-        case .timer:
+        case .manual:
             return String(localized: "workout_status_ready")
         case .smart:
             return String(localized: "workout_status_scanning")
@@ -104,12 +117,14 @@ final class WorkoutViewModel {
     }
 
     var statusHint: String {
-        if usesRepCounting {
+        if usesRepCounting && !isRepManualMode {
             return String(localized: "workout_auto_count_reps_hint")
         }
         switch mode {
-        case .timer:
-            return timerHint
+        case .manual:
+            return isRepManualMode
+                ? String(localized: "workout_manual_rep_hint")
+                : timerHint
         case .smart:
             return String(localized: "workout_auto_detect_hint")
         case .sound:
@@ -120,7 +135,6 @@ final class WorkoutViewModel {
     // MARK: - Mode selection
 
     func selectMode(_ mode: WorkoutMode) async {
-        guard mode != .timer || allowsManualMode else { return }
         guard mode != .sound || allowsSoundMode else { return }
         guard mode != .smart || supportsSmartTracking else {
             transitionToError(message: String(localized: "workout_error_smart_unavailable"))
@@ -128,8 +142,8 @@ final class WorkoutViewModel {
         }
         self.mode = mode
         switch mode {
-        case .timer:
-            enterTimerMode()
+        case .manual:
+            enterManualMode()
         case .smart:
             await initCamera()
         case .sound:
@@ -137,13 +151,16 @@ final class WorkoutViewModel {
         }
     }
 
-    private func enterTimerMode() {
+    private func enterManualMode() {
         cleanup()
         repCount = 0
         elapsed = 0
         sessionStart = nil
         completedTimerSetDurations = []
         guidedTimerEffectiveRestSeconds = 0
+        manualCurrentSet = 1
+        manualRepCounts = []
+        repEntryPending = false
         state = .idle
     }
 
@@ -226,7 +243,7 @@ final class WorkoutViewModel {
 
     func manualStart() {
         guard case .idle = state else { return }
-        if mode == .timer {
+        if mode == .manual && prescriptionType == .duration {
             startGuidedTimer()
             return
         }
@@ -235,6 +252,73 @@ final class WorkoutViewModel {
         sessionStart = sessionStart ?? Date()
         startTicker()
         state = .active(elapsedSeconds: elapsed)
+    }
+
+    func doneWithSet() {
+        guard case .active = state, isRepManualMode else { return }
+        cancelTicker()
+        repEntryPending = true
+        state = .idle
+    }
+
+    func cancelRepEntry() {
+        repEntryPending = false
+        sessionStart = sessionStart ?? Date()
+        startTicker()
+        state = .active(elapsedSeconds: elapsed)
+    }
+
+    func confirmRepSet(reps: Int) async {
+        repEntryPending = false
+        manualRepCounts.append(reps)
+        if manualRepCounts.count >= manualTotalSets {
+            cancelTicker()
+            let total = elapsed
+            await saveManualRepSession()
+            soundPlayer.play(.sessionComplete)
+            state = .complete(totalSeconds: total)
+        } else {
+            manualCurrentSet = manualRepCounts.count + 1
+            let restSecs = sessionDraft?.restSeconds ?? 60
+            _ = await runRest(seconds: restSecs, nextSetNumber: manualCurrentSet)
+            if case .resting = state { state = .idle }
+        }
+    }
+
+    private func saveManualRepSession() async {
+        guard !manualRepCounts.isEmpty else { return }
+        let totalReps = manualRepCounts.reduce(0, +)
+        let bestSet = manualRepCounts.max() ?? 0
+        let durationMinutes = max(1, Int(ceil(Double(max(elapsed, 1)) / 60.0)))
+
+        if let sessionDraft {
+            let session = sessionDraft.makeManualRepSession(
+                repCounts: manualRepCounts,
+                totalElapsedSeconds: elapsed,
+                date: sessionStart ?? Date(),
+                completedAt: Date()
+            )
+            _ = try? await completionService.completeSession(session)
+        } else {
+            let format = String(localized: "workout_manual_rep_summary_format")
+            let summary = String(format: format, totalReps, manualRepCounts.count)
+            let session = PracticeSession(
+                id: UUID().uuidString,
+                skillId: skillId,
+                date: sessionStart ?? Date(),
+                durationMinutes: durationMinutes,
+                notes: summary,
+                completedAt: Date(),
+                setsCompleted: manualRepCounts.count,
+                targetValuePerSet: bestSet,
+                restSeconds: sessionDraft?.restSeconds ?? 0,
+                durationSetValues: manualRepCounts,
+                plannedSessionId: plannedSession?.id,
+                isPersonalRecord: false,
+                sessionScore: totalReps
+            )
+            _ = try? await completionService.completeSession(session)
+        }
     }
 
     func stopSession() async {
@@ -490,7 +574,7 @@ final class WorkoutViewModel {
         let session: PracticeSession
 
         if let sessionDraft {
-            if mode == .timer, prescriptionType == .duration {
+            if mode == .manual, prescriptionType == .duration {
                 session = sessionDraft.makeTimerExecutedSession(
                     completedDurations: completedTimerSetDurations,
                     totalSessionSeconds: elapsed + guidedTimerEffectiveRestSeconds,
@@ -543,6 +627,9 @@ final class WorkoutViewModel {
         captureSession = nil
         completedTimerSetDurations = []
         guidedTimerEffectiveRestSeconds = 0
+        manualCurrentSet = 1
+        manualRepCounts = []
+        repEntryPending = false
     }
 
     private func voiceCommandErrorMessage(_ error: VoiceCommandError) -> String {

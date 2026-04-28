@@ -111,9 +111,7 @@ final class PracticeSessionViewModel {
         )
     }
 
-    var supportsTimerExecution: Bool {
-        isDurationSkill
-    }
+    var supportsTimerExecution: Bool { true }
 
     var supportsSoundExecution: Bool {
         isDurationSkill
@@ -198,7 +196,7 @@ final class PracticeSessionViewModel {
 
     private func defaultRestSeconds(for skill: Skill?) -> Int {
         guard let skill else { return 60 }
-        return skill.prescriptionType == .duration ? 45 : 90
+        return skill.prescriptionType == .duration ? 45 : 30
     }
 
     private var hasValidTargetValues: Bool {

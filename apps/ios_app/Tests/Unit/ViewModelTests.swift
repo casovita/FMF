@@ -620,7 +620,7 @@ struct PracticeSessionViewModelTests {
         #expect(vm.navigationTitle == "Log a pull-ups session")
         #expect(vm.targetLabel == "Reps per set")
         #expect(vm.targetValuePerSet == 5)
-        #expect(vm.restSeconds == 90)
+        #expect(vm.restSeconds == 30)
         #expect(vm.noteSuggestions.map(\.displayText).contains("💪 Strong"))
     }
 

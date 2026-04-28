@@ -96,15 +96,13 @@ struct SessionSetupView: View {
                 .foregroundStyle(FMFColors.neutral500)
 
             ExecutionModeCard(
-                title: String(localized: "sessionSetupModeTimerTitle"),
-                subtitle: vm.supportsTimerExecution
-                    ? String(localized: "sessionSetupModeTimerSubtitle")
-                    : String(localized: "sessionSetupModeDurationOnly"),
-                systemImage: "timer",
+                title: String(localized: "sessionSetupModeManualTitle"),
+                subtitle: String(localized: "sessionSetupModeManualSubtitle"),
+                systemImage: "hand.tap",
                 color: FMFColors.brandPrimary,
-                isEnabled: vm.supportsTimerExecution && vm.canSubmit
+                isEnabled: vm.canSubmit
             ) {
-                activeExecution = ExecutionSelection(mode: .timer, draft: vm.sessionDraft)
+                activeExecution = ExecutionSelection(mode: .manual, draft: vm.sessionDraft)
             }
 
             ExecutionModeCard(
